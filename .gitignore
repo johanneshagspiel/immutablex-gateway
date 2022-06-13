@@ -1,4 +1,6 @@
 resources/
 .idea
 __pycache__
-src_1/util/one_time_change.py
+src/util/one_time_change.py
+src/main.py
+src/util/imxpy
