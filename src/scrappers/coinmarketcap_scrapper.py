@@ -13,7 +13,7 @@ class CoinMarketCap_Scrapper():
     coinmarketcap_info_file_path = File_Handler.get_base_path("coinmarketcap_info_file")
     with open(coinmarketcap_info_file_path, 'r', encoding='utf-8') as coinmarketcap_info_file:
         coinmarketcap_info_dic = json.load(coinmarketcap_info_file)
-    coinmarketcap_info_dic.close()
+    coinmarketcap_info_file.close()
 
     temp_api_key = coinmarketcap_info_dic["api_key"]
     if len(temp_api_key) == 0:

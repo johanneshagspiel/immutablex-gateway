@@ -192,7 +192,7 @@ class File_Handler:
 
 		"pk_info_file":  _root.joinpath("resources", "client_info", "pk_info.json"),
 		"coinmarketcap_info_file":  _root.joinpath("resources", "client_info", "coinmarketcap_info.json"),
-		"coinapi_info_file": _root.joinpath("resources", "client_info", "coinapi_info_file.json"),
+		"coinapi_info_file": _root.joinpath("resources", "client_info", "coinapi_info.json"),
 
 		"sales_history": _root.joinpath("resources", "sales_history", "sales_history.csv"),
 
