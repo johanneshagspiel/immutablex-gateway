@@ -7,7 +7,7 @@
 
 # Immutable X Gateway
 
-"Immutable X Gateway" is desktop application created in order to engage more easily with the "Immutable X" API. 
+"Immutable X Gateway" is program created in order to engage more easily with the "Immutable X" API. 
 
 ["Immutable X"](https://www.immutable.com/) is a layer 2 protocol on the Ethereum blockchain that enables the user to trade NFTs instantaneously, with zero gas fees and in a carbon-neutral way. It also has an [open REST API](https://docs.x.immutable.com/reference) that empowers the user to programmatically interact with the blockchain to, for example look up all available sell orders for a particular NFT or create a trade. 
 The "Immutable X Gateway" allows the user to engage with this open API in an easy, automated way.
