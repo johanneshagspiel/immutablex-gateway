@@ -5,7 +5,7 @@ from PyQt5.QtWidgets import QGridLayout, QLabel, QLineEdit, QWidget, QRadioButto
 from PyQt5 import QtCore
 from PyQt5 import QtGui
 
-from objects.enums.tasks import Download_Task, Processing_Task, High_Level_Task
+from objects.enums.tasks import DownloadTask, ProcessingTask, HighLevelTask
 
 
 class Task_Selection_Screen(QWidget):
@@ -27,9 +27,9 @@ class Task_Selection_Screen(QWidget):
         download_column_position = 0
         download_row_position = 1
 
-        download_tasks_label = QLabel("Download Download_Task")
-        download_tasks_label.setAlignment(QtCore.Qt.AlignCenter)
-        self.grid.addWidget(download_tasks_label, download_row_position, download_column_position)
+        DownloadTasks_label = QLabel("Download DownloadTask")
+        DownloadTasks_label.setAlignment(QtCore.Qt.AlignCenter)
+        self.grid.addWidget(DownloadTasks_label, download_row_position, download_column_position)
         download_row_position = download_row_position + 1
 
 
@@ -89,9 +89,9 @@ class Task_Selection_Screen(QWidget):
         process_column_position = 1
         process_row_position = 1
 
-        processing_tasks_label = QLabel("Processing Download_Task")
-        processing_tasks_label.setAlignment(QtCore.Qt.AlignCenter)
-        self.grid.addWidget(processing_tasks_label, process_row_position, process_column_position)
+        ProcessingTasks_label = QLabel("Processing DownloadTask")
+        ProcessingTasks_label.setAlignment(QtCore.Qt.AlignCenter)
+        self.grid.addWidget(ProcessingTasks_label, process_row_position, process_column_position)
         process_row_position = process_row_position + 1
 
         process_get_type_label = QLabel("Which get_types do you want to process?")
@@ -117,42 +117,42 @@ class Task_Selection_Screen(QWidget):
         no_error = self.sanity_check()
 
         if no_error:
-            download_task_list = []
+            DownloadTask_list = []
             process_task_list = []
 
             if self.download_sell_get_type_checkbox.isChecked():
                 if self.download_active_orders_checkbox.isChecked():
-                    download_task_list.append(Download_Task.DOWN_ACTIVE_SELL_ORDERS)
+                    DownloadTask_list.append(DownloadTask.DOWN_ACTIVE_SELL_ORDERS)
                 if self.download_filled_orders_checkbox.isChecked():
-                    download_task_list.append(Download_Task.DOWN_FILLED_SELL_ORDERS)
+                    DownloadTask_list.append(DownloadTask.DOWN_FILLED_SELL_ORDERS)
                 if self.download_cancelled_orders_checkbox.isChecked():
-                    download_task_list.append(Download_Task.DOWN_CANCELLED_SELL_ORDERS)
+                    DownloadTask_list.append(DownloadTask.DOWN_CANCELLED_SELL_ORDERS)
 
             if self.download_buy_get_type_checkbox.isChecked():
                 if self.download_active_orders_checkbox.isChecked():
-                    download_task_list.append(Download_Task.DOWN_ACTIVE_BUY_ORDERS)
+                    DownloadTask_list.append(DownloadTask.DOWN_ACTIVE_BUY_ORDERS)
                 if self.download_filled_orders_checkbox.isChecked():
-                    download_task_list.append(Download_Task.DOWN_FILLED_BUY_ORDERS)
+                    DownloadTask_list.append(DownloadTask.DOWN_FILLED_BUY_ORDERS)
                 if self.download_cancelled_orders_checkbox.isChecked():
-                    download_task_list.append(Download_Task.DOWN_CANCELLED_BUY_ORDERS)
+                    DownloadTask_list.append(DownloadTask.DOWN_CANCELLED_BUY_ORDERS)
 
             if self.download_double_checking_orders_checkbox.isChecked():
-                download_task_list.append(Download_Task.DOWN_DOUBLE_CHECKING)
+                DownloadTask_list.append(DownloadTask.DOWN_DOUBLE_CHECKING)
 
             if self.download_win_rate_checkbox.isChecked():
-                download_task_list.append(Download_Task.DOWN_WIN_RATE)
+                DownloadTask_list.append(DownloadTask.DOWN_WIN_RATE)
 
             if self.process_sell_get_type_checkbox.isChecked():
-                process_task_list.append(Processing_Task.PROCESSING_NEW_DATA)
+                process_task_list.append(ProcessingTask.PROCESSING_NEW_DATA)
 
-            high_level_task_list = []
-            if len(download_task_list) > 0:
-                high_level_task_list.append((High_Level_Task.DOWNLOAD_TASK, download_task_list))
+            HighLevelTask_list = []
+            if len(DownloadTask_list) > 0:
+                HighLevelTask_list.append((HighLevelTask.DOWNLOAD_TASK, DownloadTask_list))
             if len(process_task_list) > 0:
-                high_level_task_list.append((High_Level_Task.PROCESS_TASK, process_task_list))
+                HighLevelTask_list.append((HighLevelTask.PROCESS_TASK, process_task_list))
 
-            if len(high_level_task_list) > 0:
-                self.notify_observer(high_level_task_list)
+            if len(HighLevelTask_list) > 0:
+                self.notify_observer(HighLevelTask_list)
 
     def sanity_check(self):
 

@@ -3,13 +3,13 @@ import os
 
 import pytz
 
-from objects.win_rate.win_rate_administrator import Win_Rate_Administrator
+from objects.win_rate.winrateadministrator import WinRateAdministrator
 from parallel_workers.parallel_rank_downloader import Parallel_Rank_Downloader
 from parallel_workers.parallel_win_rate_start_time_downloader import Parallel_Win_Rate_Start_Time_Downloader
 from datetime import datetime, timedelta
 
 from util.files.file_handler import File_Handler
-from util.helpers import Task_To_Console_Printer, Safe_Datetime_Converter
+from util.helpers import Task_To_Console_Printer, SafeDatetimeConverter
 from util.to_download_list_creator import To_Download_List_Creator
 
 
@@ -30,7 +30,7 @@ class Gods_Unchained_Winrate_Poller():
                 start_time_stamp_str = winrate_info_raw_restart_file.readline()
             winrate_info_raw_restart_file.close()
 
-            start_time_stamp = Safe_Datetime_Converter.string_to_datetime(start_time_stamp_str)
+            start_time_stamp = SafeDatetimeConverter.string_to_datetime(start_time_stamp_str)
 
         else:
             current_time_utc = datetime.utcnow()
@@ -49,7 +49,7 @@ class Gods_Unchained_Winrate_Poller():
 
                 time_stamp_str_list, next_start_time_stamp_str, new_not_caught_up_to_now = To_Download_List_Creator.create_timestamp_list(start_time_stamp, current_time_stamp, "download_win_rate")
 
-                start_time_stamp_str = Safe_Datetime_Converter.datetime_to_string(start_time_stamp)
+                start_time_stamp_str = SafeDatetimeConverter.datetime_to_string(start_time_stamp)
 
                 Task_To_Console_Printer.print_downloading_task_info(status_string="WIN_RATE", get_type_string=None, from_str=start_time_stamp_str, to_str=time_stamp_str_list[-1][1])
 
@@ -59,10 +59,10 @@ class Gods_Unchained_Winrate_Poller():
 
                 Task_To_Console_Printer.print_writing_warning("win_rate", get_type_string=None)
 
-                Win_Rate_Administrator.receive_winrate_list(win_rate_list, next_start_time_stamp_str)
+                WinRateAdministrator.receive_winrate_list(win_rate_list, next_start_time_stamp_str)
 
                 not_caught_up_to_now = new_not_caught_up_to_now
-                start_time_stamp = Safe_Datetime_Converter.string_to_datetime(next_start_time_stamp_str)
+                start_time_stamp = SafeDatetimeConverter.string_to_datetime(next_start_time_stamp_str)
 
 
             else:
@@ -90,7 +90,7 @@ class Gods_Unchained_Winrate_Poller():
         else:
             user_dic = {}
 
-        user_id_list = Win_Rate_Administrator.create_user_id_list()
+        user_id_list = WinRateAdministrator.create_user_id_list()
         for user_id in user_id_list:
             user_id_str = str(user_id)
 

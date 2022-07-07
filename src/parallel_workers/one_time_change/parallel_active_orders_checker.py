@@ -5,7 +5,7 @@ import logging
 import requests
 import time
 
-from scrappers.gods_unchained_poller import Gods_Unchained_Poller
+from scrappers.godsunchainedpoller import GodsUnchainedPoller
 from scrappers.immutable_x_scrapper import Immutable_X_Scrapper
 from util.custom_exceptions import TooManyAPICalls, Response_Error
 
@@ -13,7 +13,7 @@ from util.custom_exceptions import TooManyAPICalls, Response_Error
 class Parallel_Active_Orders_Checker():
 
     def __init__(self):
-        self._gp = Gods_Unchained_Poller()
+        self._gp = GodsUnchainedPoller()
 
     def parallel_download_timestamp_orders(self, order_id_list):
         connections = len(order_id_list)

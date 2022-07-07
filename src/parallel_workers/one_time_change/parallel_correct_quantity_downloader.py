@@ -4,7 +4,7 @@ import datetime
 import logging
 #logging.basicConfig(level=logging.DEBUG)
 from scrappers.coinapi_scrapper import CoinAPI_Scrapper
-from scrappers.gods_unchained_poller import Gods_Unchained_Poller
+from scrappers.godsunchainedpoller import GodsUnchainedPoller
 from util.custom_exceptions import TooManyAPICalls, Response_Error
 from util.number_converter import Number_Converter
 
@@ -12,7 +12,7 @@ from util.number_converter import Number_Converter
 class Parallel_Correct_Quantity_Downloader():
 
     def __init__(self):
-        self._gods_unchained_poller = Gods_Unchained_Poller()
+        self._GodsUnchainedPoller = GodsUnchainedPoller()
         self._logger = logging.getLogger(__name__)
         self._historical_prices_dic = CoinAPI_Scrapper.get_historical_prices()
 
@@ -46,7 +46,7 @@ class Parallel_Correct_Quantity_Downloader():
         encountered_error = False
 
         try:
-            order = self._gods_unchained_poller.get_order_by_order_id(int(row["order_id"]))
+            order = self._GodsUnchainedPoller.get_order_by_order_id(int(row["order_id"]))
             correct_quantity = order["buy"]["data"]["quantity"]
             correct_decimals = order["buy"]["data"]["decimals"]
 

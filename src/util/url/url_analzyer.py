@@ -1,11 +1,22 @@
 
-class URL_Analyzer():
+class UrlAnalyzer:
+    """
+    A class to extract information from an URL
+    """
 
     def __init__(self):
-        None
+        """
+        The constructor of the UrlAnalyzer class
+        """
+        pass
 
     @staticmethod
     def analyze_url(url):
+        """
+        A method to analyze urls
+        :param url: the url to be analyzed
+        :return: the information in the url as a dictionary
+        """
         info_part = url.split('?', maxsplit=1)[1]
         sections = info_part.split('&')
 

@@ -1,46 +1,56 @@
-from objects.orders.gods_unchained.order_administrator_gu import Order_Administrator_GU
-from objects.currency.currency import Currency_Info_Dic
-from objects.inventory.inventory_manager import Inventory_Manager
-from operators.client import Client
-from operators.trade_classifier import Trade_Classifier
-from operators.trading_manager import Trading_Manager
-from scrappers.coinmarketcap_scrapper import CoinMarketCap_Scrapper
-from util.files.file_handler import File_Handler
-from util.number_converter import Number_Converter
+from src.objects.currency.currency import CurrencyInfoDic
+from src.objects.inventory.inventorymanager import InventoryManager
+from src.operators.client import Client
+from src.operators.tradeclassifier import TradeClassifier
+from src.operators.tradingmanager import TradingManager
+from src.scrappers.coinmarketcapscrapper import CoinMarketCapScrapper
+from src.util.files.filehandler import FileHandler
+from src.util.numberconverter import NumberConverter
 
 
 
-class Gods_Unchained_Account_Manager():
+class GodsUnchainedAccountManager:
+    """
+    A class to automatically trade God Unchained cards
+    """
 
     def __init__(self):
-        self._trading_manager = Trading_Manager()
+        """
+        The constructor of the GodsUnchainedAccountManager class
+        """
+        self._trading_manager = TradingManager()
         self.client = Client()
 
     def get_inventory_list(self):
-        inventory_list = Inventory_Manager.get_inventory_list()
-        checked_inventory_list = Inventory_Manager.check_inventory_list(inventory_list)
+        """
+        A method to get an updated and checked inventory list
+        :return: inventory list
+        """
+        inventory_list = InventoryManager.get_inventory_list()
+        checked_inventory_list = InventoryManager.check_inventory_list(inventory_list)
         return checked_inventory_list
 
-
     def purchase_card(self, purchase_order_id, currency_to_sell_in):
+        """
+        A method purchase a card
+        :param purchase_order_id: the order id of the card to be purchased
+        :param currency_to_sell_in: the currency to sell the card in
+        :return: None
+        """
 
         filled_order = self.client.purchase_card(purchase_order_id=purchase_order_id)
 
         if filled_order:
-            new_inventory_entry = Inventory_Manager.create_new_inventory_entry_purchased_now(filled_order, currency_to_sell_in)
-            Inventory_Manager.add_new_inventory_entry_to_file(new_inventory_entry)
-
-    def test(self):
-        result_df, dic = Trade_Classifier.create_df_of_orders_type_5(inventory_list=self.get_inventory_list(), purchase_currency="GODS", sale_currency="ETH")
-
-        test_directory_path = File_Handler.get_base_path("test_directory")
-        test_file_path = str(test_directory_path) + "//test.csv"
-        result_df.to_csv(test_file_path, index=False)
-
+            new_inventory_entry = InventoryManager.create_new_inventory_entry_purchased_now(filled_order, currency_to_sell_in)
+            InventoryManager.add_new_inventory_entry_to_file(new_inventory_entry)
 
     def get_balance(self):
+        """
+        A method to get the latest token balance
+        :return: the token balance as a dictionary
+        """
 
-        latest_currency_price_dic = CoinMarketCap_Scrapper.get_latest_currency_price()
+        latest_currency_price_dic = CoinMarketCapScrapper.get_latest_currency_price()
 
         client = Client()
         token_balance_list = client.get_token_balance_of_user()
@@ -50,8 +60,8 @@ class Gods_Unchained_Account_Manager():
         for token_dic in token_balance_list:
             symbol = token_dic["symbol"]
             quantity = int(token_dic["balance"])
-            decimals = Currency_Info_Dic.get[symbol]["decimals"]
-            tokens = Number_Converter.get_float_from_quantity_decimal(quantity=quantity, decimals=decimals)
+            decimals = CurrencyInfoDic.information_dic[symbol]["decimals"]
+            tokens = NumberConverter.get_float_from_quantity_decimal(quantity=quantity, decimals=decimals)
             euro_value = tokens * latest_currency_price_dic[symbol]
 
             new_balance_dic[symbol] = {}
@@ -63,8 +73,6 @@ class Gods_Unchained_Account_Manager():
 
             new_balance_dic[symbol]["total"]["tokens"] = tokens
             new_balance_dic[symbol]["total"]["euro"] = euro_value
-
-
 
         for inventory_entry in self.inventory_list:
             currency = inventory_entry.purchase_currency
@@ -86,11 +94,11 @@ class Gods_Unchained_Account_Manager():
 
         return new_balance_dic
 
-
-
-    ####
-
     def run(self):
+        """
+        A method to run the automated trading loop
+        :return: None
+        """
 
         self.inventory_list = self.get_inventory_list()
         self.balance_dic = self.get_balance()

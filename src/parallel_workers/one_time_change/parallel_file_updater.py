@@ -5,14 +5,14 @@ import logging
 #logging.basicConfig(level=logging.DEBUG)
 import requests
 
-from scrappers.gods_unchained_poller import Gods_Unchained_Poller
+from scrappers.godsunchainedpoller import GodsUnchainedPoller
 from util.custom_exceptions import TooManyAPICalls, Response_Error
 
 
 class Parallel_File_Updater():
 
     def __init__(self):
-        self._gods_unchained_poller = Gods_Unchained_Poller()
+        self._GodsUnchainedPoller = GodsUnchainedPoller()
         self._logger = logging.getLogger(__name__)
 
     def parallel_update_files(self, order_combination_list):
@@ -35,6 +35,6 @@ class Parallel_File_Updater():
         status = order_combination[1]
 
         try:
-            self._gods_unchained_poller.download_order(get_type, status, amount_connections)
+            self._GodsUnchainedPoller.download_order(get_type, status, amount_connections)
         except Exception as e:
             raise

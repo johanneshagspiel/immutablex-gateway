@@ -5,7 +5,7 @@ from PyQt5.QtWidgets import QGridLayout, QLabel, QLineEdit, QWidget, QRadioButto
 from PyQt5 import QtCore
 from PyQt5 import QtGui
 
-from objects.enums.tasks import Download_Task, Processing_Task, High_Level_Task
+from objects.enums.tasks import DownloadTask, ProcessingTask, HighLevelTask
 
 class Task_Preparation_Screen():
 

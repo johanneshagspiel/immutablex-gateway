@@ -1,18 +1,29 @@
 import time
+from src.scrappers.godsunchainedpoller import GodsUnchainedPoller
+from src.util.custom_exceptions import ResponseError, RequestError, TooManyAPICalls, InternalServerError, \
+    StartNewDayError
 
-from scrappers.gods_unchained_poller import Gods_Unchained_Poller
-from util.custom_exceptions import Response_Error, Request_Error, TooManyAPICalls, Internal_Server_Error, \
-    Start_New_Day_Error
 
-
-class Safe_Gods_Unchained_Poller():
+class SafeGodsUnchainedPoller:
+    """
+    A class to make exception safe requests to the IMX api
+    """
 
     def __init__(self):
-        None
+        """
+        The constructor of the SafeGodsUnchainedPoller class
+        """
+        pass
 
     @staticmethod
     def safe_download(task, information_dic):
-        gp = Gods_Unchained_Poller()
+        """
+        A method to safe download information
+        :param task: information to be downloaded
+        :param information_dic: additional information dictionary
+        :return: result
+        """
+        gp = GodsUnchainedPoller()
 
         try:
             if task == "get_order_by_order_id":
@@ -27,9 +38,8 @@ class Safe_Gods_Unchained_Poller():
 
                 result = gp.get_all_active_sell_orders_for_a_currency_and_quality(asset_name=asset_name, currency_string=currency_string, quality=quality)
 
-
-        except (Response_Error, Request_Error, TooManyAPICalls, Internal_Server_Error, Start_New_Day_Error) as custom_errors:
+        except (ResponseError, RequestError, TooManyAPICalls, InternalServerError, StartNewDayError):
             time.sleep(5)
-            return Safe_Gods_Unchained_Poller.safe_download(task, information_dic)
+            return SafeGodsUnchainedPoller.safe_download(task, information_dic)
 
         return result

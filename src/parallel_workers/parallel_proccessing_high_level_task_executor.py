@@ -2,57 +2,63 @@ import concurrent.futures
 import sys
 import time
 import traceback
-#logging.basicConfig(level=logging.DEBUG)
-
-from objects.orders.gods_unchained.order_administrator_gu import Order_Administrator_GU
-from objects.enums.tasks import Processing_Task, High_Level_Task, Download_Task
-from operators.connection_manager import Connection_Manager
-from operators.error_handler import Error_Handler
-from parallel_workers.parallel_proccessing_task_executor import Parallel_Processing_Task_Executor
-from parallel_workers.parallel_download_task_executor import Parallel_Download_Task_Executor
-from util.custom_exceptions import TooManyAPICalls, Response_Error, Start_New_Day_Error, Request_Error, \
-    Internal_Server_Error, Download_Log_Error
-from util.helpers import Future_Helper
+from src.objects.enums.tasks import ProcessingTask, HighLevelTask, DownloadTask
+from src.operators.connectionmanager import ConnectionManager
+from src.operators.errorhandler import ErrorHandler
+from src.parallel_workers.parallel_proccessing_task_executor import ParallelProcessingTaskExecutor
+from src.parallel_workers.paralleldownloadtaskexecutor import ParallelDownloadTaskExecutor
+from src.util.custom_exceptions import TooManyAPICalls, ResponseError, StartNewDayError, RequestError, \
+    InternalServerError
+from src.util.helpers import FutureHelper
 
 
-class Parallel_Processing_High_Level_Task_Executor():
+class ParallelProcessingHighLevelTaskExecutor:
+    """
+    A class to parallel execute high level tasks (download or process tasks)
+    """
 
     def __init__(self):
-        self._parallel_download_task_executor = Parallel_Download_Task_Executor()
-        self._parallel_download_task_executor.observer = self
+        """
+        The constructor of the ParallelProcessingHighLevelTaskExecutor
+        """
+        self._ParallelDownloadTaskExecutor = ParallelDownloadTaskExecutor()
+        self._ParallelDownloadTaskExecutor.observer = self
 
-        self._parallel_processing_task_executor = Parallel_Processing_Task_Executor()
+        self._parallel_ProcessingTask_executor = ParallelProcessingTaskExecutor()
 
-        self._connection_manager = Connection_Manager(austria=False)
-        self._error_handler = Error_Handler()
+        self._ConnectionManager = ConnectionManager()
+        self._ErrorHandler = ErrorHandler()
 
         self._wait_to_to_shutdown = True
 
-
     def run(self, mode):
+        """
+        A method to run a list of high level tasks
+        :param mode: whether to execute download or processing tasks
+        :return: None
+        """
 
-        ### download_list ############################################################################################
-        combined_download_task_list = [Download_Task.DOWN_ACTIVE_SELL_ORDERS, Download_Task.DOWN_FILLED_SELL_ORDERS, Download_Task.DOWN_CANCELLED_SELL_ORDERS,
-                                       Download_Task.DOWN_ACTIVE_BUY_ORDERS, Download_Task.DOWN_FILLED_BUY_ORDERS, Download_Task.DOWN_CANCELLED_BUY_ORDERS,
-                                       Download_Task.DOWN_MISSING_ORDERS
+        combined_DownloadTask_list = [DownloadTask.DOWN_ACTIVE_SELL_ORDERS, DownloadTask.DOWN_FILLED_SELL_ORDERS, DownloadTask.DOWN_CANCELLED_SELL_ORDERS,
+                                       DownloadTask.DOWN_ACTIVE_BUY_ORDERS, DownloadTask.DOWN_FILLED_BUY_ORDERS, DownloadTask.DOWN_CANCELLED_BUY_ORDERS,
+                                       DownloadTask.DOWN_MISSING_ORDERS
                                        ]
-        sell_download_task_list = [Download_Task.DOWN_ACTIVE_SELL_ORDERS, Download_Task.DOWN_FILLED_SELL_ORDERS, Download_Task.DOWN_CANCELLED_SELL_ORDERS,
-                                   Download_Task.DOWN_WIN_RATE]
 
-        win_rate_list = [Download_Task.DOWN_WIN_RATE]
-        double_checking_list = [Download_Task.DOWN_DOUBLE_CHECKING]
-        missing_list = [Download_Task.DOWN_MISSING_ORDERS]
+        sell_DownloadTask_list = [DownloadTask.DOWN_ACTIVE_SELL_ORDERS, DownloadTask.DOWN_FILLED_SELL_ORDERS, DownloadTask.DOWN_CANCELLED_SELL_ORDERS,
+                                   DownloadTask.DOWN_WIN_RATE]
 
-        test_1 = [Download_Task.DOWN_CANCELLED_BUY_ORDERS]
-        test_2 = [Download_Task.DOWN_CANCELLED_BUY_ORDERS]
+        win_rate_list = [DownloadTask.DOWN_WIN_RATE]
+        double_checking_list = [DownloadTask.DOWN_DOUBLE_CHECKING]
+        missing_list = [DownloadTask.DOWN_MISSING_ORDERS]
 
-        ### process_list ##########################################################################################
-        process_task_list = [Processing_Task.PROCESSING_NEW_DATA]
+        test_1 = [DownloadTask.DOWN_CANCELLED_BUY_ORDERS]
+        test_2 = [DownloadTask.DOWN_CANCELLED_BUY_ORDERS]
+
+        process_task_list = [ProcessingTask.PROCESSING_NEW_DATA]
 
         if mode == "download":
-            task_list = [(High_Level_Task.DOWNLOAD_TASK, sell_download_task_list)]
+            task_list = [(HighLevelTask.DOWNLOAD_TASK, sell_DownloadTask_list)]
         elif mode == "process":
-            task_list = [(High_Level_Task.PROCESS_TASK, process_task_list)]
+            task_list = [(HighLevelTask.PROCESS_TASK, process_task_list)]
 
         try:
             self.parallel_execute_high_level_task(task_list=task_list)
@@ -74,24 +80,27 @@ class Parallel_Processing_High_Level_Task_Executor():
             traceback.print_exc()
             print("#")
 
-
     def parallel_execute_high_level_task(self, task_list):
+        """
+        A method to parallel execute high level tasks
+        :param task_list: a list of high level tasks to be executed
+        :return: None
+        """
         amount_tasks = len(task_list)
 
-        high_level_task_list = [entry[0] for entry in task_list]
+        HighLevelTask_list = [entry[0] for entry in task_list]
 
-        if High_Level_Task.DOWNLOAD_TASK in high_level_task_list:
+        if HighLevelTask.DOWNLOAD_TASK in HighLevelTask_list:
 
             print("Is Nordvpn on? Type yes to continue")
 
             answer = input()
 
             if answer == "yes":
-                self._connection_manager.switch_ip(not_first_time=False)
+                self._ConnectionManager.switch_ip(not_first_time=False)
             else:
                 print("Nordvpn is not on - therefore the programme shuts down")
                 sys.exit()
-
 
         executor = concurrent.futures.ThreadPoolExecutor(max_workers=amount_tasks)
         future_list = []
@@ -99,42 +108,60 @@ class Parallel_Processing_High_Level_Task_Executor():
             temp_future = executor.submit(self._execute_high_level_task, high_level, task_info_list)
             future_list.append(temp_future)
 
-        while Future_Helper.at_least_one_future_not_done(future_list):
+        while FutureHelper.at_least_one_future_not_done(future_list):
             time.sleep(1)
 
+    def _execute_high_level_task(self, HighLevelTask, task_list):
+        """
+        A method to execute an high level task
+        :param HighLevelTask:the high level task to be executed
+        :param task_list: the tasks to be executed
+        :return: None
+        """
 
-    def _execute_high_level_task(self, high_level_task, task_list):
-
-        if high_level_task == High_Level_Task.DOWNLOAD_TASK:
+        if HighLevelTask == HighLevelTask.DOWNLOAD_TASK:
             self._execute_download_task(task_list)
 
-        elif high_level_task == High_Level_Task.PROCESS_TASK:
+        elif HighLevelTask == HighLevelTask.PROCESS_TASK:
             self._execute_processing_task(task_list)
 
-
     def _execute_processing_task(self, task_list):
-        self._parallel_processing_task_executor.parallel_execute_processing_task(task_list=task_list)
-
+        """
+        A method to execute processing task
+        :param task_list: a list of processing tasks to be executed
+        :return: None
+        """
+        self._parallel_ProcessingTask_executor.parallel_execute_processing_task(task_list=task_list)
 
     def _execute_download_task(self, task_list):
-        self._parallel_download_task_executor.parallel_execute_download_task(task_list=task_list)
-
+        """
+        A method to execute download task
+        :param task_list: a list of download tasks to be executed
+        :return: None
+        """
+        self._ParallelDownloadTaskExecutor.parallel_execute_download_task(task_list=task_list)
 
     def inform(self, information, sender):
+        """
+        A method to deal with received information
+        :param information: the received information
+        :param sender: the sender of the information
+        :return: None
+        """
 
         print(f"Received {information} from {sender}")
 
-        if isinstance(information, (Response_Error, Request_Error, TooManyAPICalls, Internal_Server_Error)):
+        if isinstance(information, (ResponseError, RequestError, TooManyAPICalls, InternalServerError)):
             print(" ")
             print(information)
-            self._connection_manager.switch_ip()
-            self._parallel_download_task_executor.restart()
+            self._ConnectionManager.switch_ip()
+            self._ParallelDownloadTaskExecutor.restart()
 
-        elif isinstance(information, Start_New_Day_Error):
+        elif isinstance(information, StartNewDayError):
             print(" ")
             print(information)
             time.sleep(10)
-            self._parallel_download_task_executor.restart()
+            self._ParallelDownloadTaskExecutor.restart()
 
         elif isinstance(information, Exception):
             traceback.print_exc()
@@ -144,5 +171,9 @@ class Parallel_Processing_High_Level_Task_Executor():
                 self._wait_to_to_shutdown = False
 
     def shutdown(self):
-        self._parallel_download_task_executor.shutdown()
-        self._parallel_processing_task_executor.shutdown()
+        """
+        A method to shutdown the parallel high level task executor
+        :return: None
+        """
+        self._ParallelDownloadTaskExecutor.shutdown()
+        self._parallel_ProcessingTask_executor.shutdown()

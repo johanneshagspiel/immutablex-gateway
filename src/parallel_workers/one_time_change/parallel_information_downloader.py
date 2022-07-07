@@ -3,14 +3,14 @@ import json
 import traceback
 import logging
 #logging.basicConfig(level=logging.DEBUG)
-from scrappers.gods_unchained_poller import Gods_Unchained_Poller
+from scrappers.godsunchainedpoller import GodsUnchainedPoller
 from util.custom_exceptions import TooManyAPICalls, Response_Error
 
 
 class Parallel_Information_downloader():
 
     def __init__(self):
-        self._gods_unchained_poller = Gods_Unchained_Poller()
+        self._GodsUnchainedPoller = GodsUnchainedPoller()
         self._logger = logging.getLogger(__name__)
 
     def parallel_download_information_for_old_orders(self, old_order_list):
@@ -41,7 +41,7 @@ class Parallel_Information_downloader():
 
         try:
             type = old_order.type
-            result = self._gods_unchained_poller.get_order_by_order_id(old_order.order_id)
+            result = self._GodsUnchainedPoller.get_order_by_order_id(old_order.order_id)
 
             if type == "sell":
                 token_id = result["sell"]["data"]["token_id"]

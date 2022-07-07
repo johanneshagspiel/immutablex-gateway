@@ -3,10 +3,18 @@ from colorama import Fore, Style
 import pytz
 
 
-class Windows_Path_Helper():
+class WindowsPathHelper:
+    """
+    A class to deal with windows paths
+    """
 
     @staticmethod
     def convert_string_to_legal_windows_path(string):
+        """
+        A method to convert illegal characters in a string for a Windows path
+        :param string: a Windows path
+        :return: a string without illegal characters
+        """
 
         illegal_characters = ['<', '>', ':', '"', '/', '\\', '|', '?', '*']
 
@@ -22,11 +30,18 @@ class Windows_Path_Helper():
         cleaned_string = "".join(character_list)
         return cleaned_string
 
-
-class Future_Helper():
+class FutureHelper:
+    """
+    A class to deal with future objects
+    """
 
     @staticmethod
     def at_least_one_future_not_done(future_list):
+        """
+        A method to determine whether at least one future is still running
+        :param future_list: a list of futures
+        :return: whether at lest one future is still running
+        """
 
         for future in future_list:
             if future.done():
@@ -34,10 +49,18 @@ class Future_Helper():
 
         return True
 
-class Result_Collection_Filter():
+class ResultCollectionFilter:
+    """
+    A class to filter out information from a list of collections
+    """
 
     @staticmethod
     def get_trade_addresses(order_json):
+        """
+        A method get the trade addresses from an order
+        :param order_json: the order as a dictionary
+        :return: the addresses between which the trade has happened
+        """
         address_1 = order_json["sell"]["data"]["token_address"]
         address_2 = order_json["buy"]["data"]["token_address"]
 
@@ -47,19 +70,27 @@ class Result_Collection_Filter():
 
     @staticmethod
     def is_trade(order_json):
+        """
+        A method to check whether one order is a trade
+        :param order_json: an order to be checked
+        :return: whether this order is a trade
+        """
 
         if ("buy" not in order_json) or ("sell" not in order_json):
             raise Exception(f"What kind of order is this: {order_json}")
-
 
         if ("decimals" in order_json["buy"]["data"]) or ("decimals" in order_json["sell"]["data"]):
             return False
         else:
             return True
 
-
     @staticmethod
     def belongs_to_gu(order_json):
+        """
+        A method to check whether an order belongs to Gods Unchained
+        :param order_json: an order to be checked
+        :return: whether an order belongs to Gods Unchained
+        """
 
         if "decimals" in order_json["buy"]["data"]:
             collection_address = order_json["sell"]["data"]["token_address"]
@@ -75,11 +106,19 @@ class Result_Collection_Filter():
 
         return collection_address == "0xacb3c6a43d15b907e8433077b6d38ae40936fe2c"
 
-
-class Panda_Helper():
+class PandaHelper:
+    """
+    A class to help with manipulating panda DataFrames
+    """
 
     @staticmethod
     def filtering_bot_user_series(x, sorted_bot_dic):
+        """
+        A method determine how many bots there are in a DataFrame
+        :param x: a DataFrame to be checked
+        :param sorted_bot_dic: a dictionary of bots
+        :return: how mnay bots there are in a DataFrame
+        """
 
         value_list = list(x.values)
         total_amount = len(value_list)
@@ -98,15 +137,26 @@ class Panda_Helper():
 
     @staticmethod
     def total_sales_in_the_past(day_sale_dic):
+        """
+        A method to determine the total amount of sales in the past
+        :param day_sale_dic: a dictionary of sales
+        :return: the total amount of sales done
+        """
         total_sale_count = 0
         if day_sale_dic:
             for sales in day_sale_dic.values():
                 total_sale_count = total_sale_count + sales
         return total_sale_count
 
-
     @staticmethod
     def days_in_last_x_with_at_least_y_sales(day_sale_dic, amount_of_days, min_sales):
+        """
+        A method to determine whether on x days at least y amount of sales has been made
+        :param day_sale_dic: a dictionary of sales
+        :param amount_of_days: how many days are needed
+        :param min_sales: the minimal amount of sales needed
+        :return: whether on x days at least y amount of sales has been made
+        """
 
         if day_sale_dic:
 
@@ -130,10 +180,18 @@ class Panda_Helper():
         else:
             return False
 
-class Safe_Datetime_Converter():
+class SafeDatetimeConverter:
+    """
+    A class to safely converte between strings and datetime
+    """
 
     @staticmethod
     def string_to_datetime(datetime_str):
+        """
+        A method to convert a string to datetime
+        :param datetime_str: a datetime as string
+        :return: a datetime object
+        """
 
         try:
             datetime_res = datetime.strptime(datetime_str, "%Y-%m-%dT%H:%M:%S.%fZ")
@@ -145,9 +203,13 @@ class Safe_Datetime_Converter():
 
         return datetime_res
 
-
     @staticmethod
     def datetime_to_string(timestamp):
+        """
+        A method to convert a datetime object to string
+        :param timestamp: a datetime object
+        :return: a string
+        """
 
         try:
             datetime_str = datetime.strftime(timestamp, "%Y-%m-%dT%H:%M:%S.%fZ")
@@ -159,12 +221,22 @@ class Safe_Datetime_Converter():
 
         return datetime_str
 
-
-
-class Task_To_Console_Printer():
+class TaskToConsolePrinter:
+    """
+    A class to easily format text for the console
+    """
 
     @staticmethod
     def print_downloading_task_info(status_string, get_type_string, from_str, to_str, additional_info=None):
+        """
+        A method to print download information
+        :param status_string: the status of the orders downloaded
+        :param get_type_string: the type of the orders downloaded
+        :param from_str: the start timestamp
+        :param to_str: the end timestamp
+        :param additional_info: additional information about the download process
+        :return: None
+        """
 
         current_time_local = datetime.now()
         current_time_utc = current_time_local.astimezone(pytz.utc).isoformat().replace("+00:00", "Z").split('T')[1]
@@ -190,9 +262,14 @@ class Task_To_Console_Printer():
         elif status_string == "DOUBLE_CHECKED":
             print(Fore.CYAN + f"{current_time_utc}" + Style.RESET_ALL + ": Downloading\t" + Fore.CYAN + f"DOUBLE_CHECKED\t" + Style.RESET_ALL + f" Orders from {str(from_str)} to {str(to_str)} up to {additional_info}")
 
-
     @staticmethod
     def print_waiting_task_info(status_string, get_type_string):
+        """
+        A method to print information about waiting state
+        :param status_string: the status of the orders downloaded
+        :param get_type_string: the type of the orders downloaded
+        :return: None
+        """
 
         current_time_local = datetime.now()
         current_time_utc = current_time_local.astimezone(pytz.utc).isoformat().replace("+00:00", "Z").split('T')[1]
@@ -218,9 +295,14 @@ class Task_To_Console_Printer():
         elif status_string == "DOUBLE_CHECKED":
             print(Fore.CYAN + f"{current_time_utc}" + Style.RESET_ALL + ": Task\t\t\t" + Fore.CYAN + f"DOUBLE_CHECKED\t" + Style.RESET_ALL + f" is waiting until something new can be downloaded")
 
-
     @staticmethod
     def print_writing_warning(status_str, get_type_string):
+        """
+        A method to print warnings to the console
+        :param status_str: the status of the orders downloaded
+        :param get_type_string: the type of the orders downloaded
+        :return: None
+        """
 
         current_time_local = datetime.now()
         current_time_utc = current_time_local.astimezone(pytz.utc).isoformat().replace("+00:00", "Z").split('T')[1]
@@ -246,30 +328,35 @@ class Task_To_Console_Printer():
         elif status_str == "DOUBLE_CHECKED":
             print(Fore.RED + f"{current_time_utc}" + Style.RESET_ALL + ": Writing\t\t" + Fore.RED + f"{status_str.upper()}\t" + Style.RESET_ALL + f" Orders")
 
-
     @staticmethod
     def print_finished_task_info(status_str, get_type_string):
+        """
+        A method to print finished download information
+        :param status_str: the status of the orders downloaded
+        :param get_type_string: the type of the orders downloaded
+        :return: None
+        """
 
-            current_time_local = datetime.now()
-            current_time_utc = current_time_local.astimezone(pytz.utc).isoformat().replace("+00:00", "Z").split('T')[1]
+        current_time_local = datetime.now()
+        current_time_utc = current_time_local.astimezone(pytz.utc).isoformat().replace("+00:00", "Z").split('T')[1]
 
-            if status_str == "WIN_RATE":
-                print(Fore.RED + f"{current_time_utc}" + Style.RESET_ALL + ": Finished with\t" + Fore.RED + "WIN_RATE" + Style.RESET_ALL)
+        if status_str == "WIN_RATE":
+            print(Fore.RED + f"{current_time_utc}" + Style.RESET_ALL + ": Finished with\t" + Fore.RED + "WIN_RATE" + Style.RESET_ALL)
 
-            elif status_str == "USER_RANK":
-                print(Fore.RED + f"{current_time_utc}" + Style.RESET_ALL + ": Finished with\t" + Fore.RED + "USER_RANK" + Style.RESET_ALL)
+        elif status_str == "USER_RANK":
+            print(Fore.RED + f"{current_time_utc}" + Style.RESET_ALL + ": Finished with\t" + Fore.RED + "USER_RANK" + Style.RESET_ALL)
 
-            elif status_str == "ACTIVE":
-                print(Fore.RED + f"{current_time_utc}" + Style.RESET_ALL + ": Finished with\t" + Fore.RED + f"{status_str.upper()} {get_type_string.upper()}\t\t" + Style.RESET_ALL + f" Orders")
+        elif status_str == "ACTIVE":
+            print(Fore.RED + f"{current_time_utc}" + Style.RESET_ALL + ": Finished with\t" + Fore.RED + f"{status_str.upper()} {get_type_string.upper()}\t\t" + Style.RESET_ALL + f" Orders")
 
-            elif status_str == "FILLED":
-                print(Fore.RED + f"{current_time_utc}" + Style.RESET_ALL + ": Finished with\t" + Fore.RED + f"{status_str.upper()} {get_type_string.upper()}\t\t" + Style.RESET_ALL + f" Orders")
+        elif status_str == "FILLED":
+            print(Fore.RED + f"{current_time_utc}" + Style.RESET_ALL + ": Finished with\t" + Fore.RED + f"{status_str.upper()} {get_type_string.upper()}\t\t" + Style.RESET_ALL + f" Orders")
 
-            elif status_str == "CANCELLED":
-                print(Fore.RED + f"{current_time_utc}" + Style.RESET_ALL + ": Finished with\t" + Fore.RED + f"{status_str.upper()} {get_type_string.upper()}\t" + Style.RESET_ALL + f" Orders")
+        elif status_str == "CANCELLED":
+            print(Fore.RED + f"{current_time_utc}" + Style.RESET_ALL + ": Finished with\t" + Fore.RED + f"{status_str.upper()} {get_type_string.upper()}\t" + Style.RESET_ALL + f" Orders")
 
-            elif status_str == "MISSED":
-                print(Fore.RED + f"{current_time_utc}" + Style.RESET_ALL + ": Finished with\t" + Fore.RED + f"{status_str.upper()}\t\t\t" + Style.RESET_ALL + f" Orders")
+        elif status_str == "MISSED":
+            print(Fore.RED + f"{current_time_utc}" + Style.RESET_ALL + ": Finished with\t" + Fore.RED + f"{status_str.upper()}\t\t\t" + Style.RESET_ALL + f" Orders")
 
-            elif status_str == "DOUBLE_CHECKED":
-                print(Fore.RED + f"{current_time_utc}" + Style.RESET_ALL + ": Finished with\t" + Fore.RED + f"{status_str.upper()}\t" + Style.RESET_ALL + f" Orders")
+        elif status_str == "DOUBLE_CHECKED":
+            print(Fore.RED + f"{current_time_utc}" + Style.RESET_ALL + ": Finished with\t" + Fore.RED + f"{status_str.upper()}\t" + Style.RESET_ALL + f" Orders")

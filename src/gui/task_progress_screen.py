@@ -5,7 +5,7 @@ from PyQt5.QtWidgets import QGridLayout, QLabel, QLineEdit, QWidget, QRadioButto
 from PyQt5 import QtCore
 from PyQt5 import QtGui
 
-from parallel_workers.parallel_proccessing_high_level_task_executor import Parallel_Processing_High_Level_Task_Executor
+from parallel_workers.parallel_proccessing_HighLevelTask_executor import Parallel_Processing_HighLevelTask_Executor
 from util.files.file_io_helper import File_IO_Helper
 
 
@@ -15,10 +15,10 @@ class Task_Progress_Screen(QWidget):
         super().__init__()
         self.observer = None
 
-    def initUI(self, high_level_task_list):
+    def initUI(self, HighLevelTask_list):
 
         File_IO_Helper.write_stop_parallel_processing_boolean(False)
-        self.pphlte = Parallel_Processing_High_Level_Task_Executor()
+        self.pphlte = Parallel_Processing_HighLevelTask_Executor()
 
         self.text_box_list = []
 
@@ -34,13 +34,13 @@ class Task_Progress_Screen(QWidget):
 
         combined_task_list = []
 
-        for high_level_task, task_list in high_level_task_list:
-            high_level_task_label = QLabel(f"{high_level_task.name.capitalize()} Progress")
-            high_level_task_label.setAlignment(QtCore.Qt.AlignCenter)
-            self.grid.addWidget(high_level_task_label, task_row_position, high_level_column_position)
+        for HighLevelTask, task_list in HighLevelTask_list:
+            HighLevelTask_label = QLabel(f"{HighLevelTask.name.capitalize()} Progress")
+            HighLevelTask_label.setAlignment(QtCore.Qt.AlignCenter)
+            self.grid.addWidget(HighLevelTask_label, task_row_position, high_level_column_position)
             task_row_position = task_row_position + 1
 
-            new_high_level_task_list = []
+            new_HighLevelTask_list = []
 
             for task in task_list:
                 task_label = QLabel(f"{task.name.capitalize()} Progress")
@@ -55,9 +55,9 @@ class Task_Progress_Screen(QWidget):
 
                 self.text_box_list.append(task_text_box)
 
-                new_high_level_task_list.append((task, task_text_box))
+                new_HighLevelTask_list.append((task, task_text_box))
 
-            combined_task_list.append((high_level_task, new_high_level_task_list))
+            combined_task_list.append((HighLevelTask, new_HighLevelTask_list))
 
             high_level_column_position = high_level_column_position + 1
 
@@ -80,7 +80,7 @@ class Task_Progress_Screen(QWidget):
         self.combined_task_list = combined_task_list
 
     def test(self):
-        #self.pphlte.parallel_execute_high_level_task(get_type="SELL", task_list=self.combined_task_list)
+        #self.pphlte.parallel_execute_HighLevelTask(get_type="SELL", task_list=self.combined_task_list)
         for high_leveltask, task_information_list in self.combined_task_list:
             for task, line_entry in task_information_list:
                 line_entry.setText("Test")

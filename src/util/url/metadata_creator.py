@@ -1,13 +1,24 @@
 import urllib
 
 
-class Metadata_Creator():
+class MetaDataCreator:
+    """
+    A method to encode data for the metadata field for the IMX api
+    """
 
     def __init__(self):
-        None
+        """
+        The constructor for the MetaDataCreator class
+        """
+        pass
 
     @staticmethod
     def encode_meta_data_dic(meta_data_dic):
+        """
+        A method to encode meta data
+        :param meta_data_dic: meta data in form of a dictionary
+        :return: an encoded string
+        """
         start_str = "{"
         combination_str = start_str
 
@@ -26,15 +37,24 @@ class Metadata_Creator():
 
         return encoded_str
 
-
     @staticmethod
     def encode_name_search(asset_name):
+        """
+        A method to encode search by asset name
+        :param asset_name: the asset name searched
+        :return: the encoded asset name
+        """
         metadata = """{"name":[\"""" + asset_name + "\"]}"
         metadata_enc = urllib.parse.quote(metadata)
         return metadata_enc
 
     @staticmethod
     def encode_stark_signature(stark_signature):
+        """
+        A method to encode a stark signature
+        :param stark_signature: the signature to be encoded
+        :return: the encoded stark signature
+        """
         metadata = """'{"stark_signature": \"""" + stark_signature + "\"}'"
         print(metadata)
         metadata_enc = urllib.parse.quote(metadata)

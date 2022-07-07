@@ -1,10 +1,12 @@
 from enum import Enum
 
-class High_Level_Task(Enum):
+
+class HighLevelTask(Enum):
     DOWNLOAD_TASK = 1
     PROCESS_TASK = 2
 
-class Download_Task(Enum):
+
+class DownloadTask(Enum):
     DOWN_ACTIVE_SELL_ORDERS = 1
     DOWN_FILLED_SELL_ORDERS = 2
     DOWN_CANCELLED_SELL_ORDERS = 3
@@ -17,6 +19,7 @@ class Download_Task(Enum):
     DOWN_DOUBLE_CHECKING = 8
     DOWN_MISSING_ORDERS = 9
 
-class Processing_Task(Enum):
+
+class ProcessingTask(Enum):
     PROCESSING_NEW_DATA = 1
     WRITING_NEW_DATA = 2
