@@ -3,7 +3,7 @@ import time
 from src.objects.currency.currency import Currency
 from src.scrappers.coinmarketcapscrapper import CoinMarketCapScrapper
 from src.scrappers.godsunchainedpoller import GodsUnchainedPoller
-from src.scrappers.safe_GodsUnchainedPoller import Safe_GodsUnchainedPoller
+from src.scrappers.safe_gods_unchained_poller import SafeGodsUnchainedPoller
 from src.util.files.filehandler import FileHandler
 from src.util.imxpy.imx_client import IMXClient
 from src.util.imxpy.imx_objects import CancelOrderParams, CreateOrderParams, ERC721, ERC20, ETH, CreateTradeParams, \
@@ -248,7 +248,7 @@ class Client:
 
         additional_info_dic_1 = {}
         additional_info_dic_1["order_id"] = purchase_order_id
-        order = Safe_GodsUnchainedPoller.safe_download(task="get_order_by_order_id",
+        order = SafeGodsUnchainedPoller.safe_download(task="get_order_by_order_id",
                                                          information_dic=additional_info_dic_1)
 
         current_status = order.status
@@ -271,7 +271,7 @@ class Client:
                 additional_info_dic_2["currency_string"] = sale_currency
                 additional_info_dic_2["quality"] = classification_dic["quality"]
 
-                other_orders_list = Safe_GodsUnchainedPoller.safe_download(
+                other_orders_list = SafeGodsUnchainedPoller.safe_download(
                     task="get_all_active_sell_orders_for_a_currency_and_quality",
                     information_dic=additional_info_dic_2)
 
@@ -318,7 +318,7 @@ class Client:
 
                     additional_info_dic_3 = {}
                     additional_info_dic_3["order_id"] = purchase_order_id
-                    new_order = Safe_GodsUnchainedPoller.safe_download(task="get_order_by_order_id",
+                    new_order = SafeGodsUnchainedPoller.safe_download(task="get_order_by_order_id",
                                                                          information_dic=additional_info_dic_3)
 
                     if new_order.status == "filled":

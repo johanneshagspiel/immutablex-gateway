@@ -103,6 +103,29 @@ class OrderFactoryGU:
                 elif order_json["buy"]["data"]["token_address"] == "0xed35af169af46a02ee13b9d79eb57d6d68c1749e":
                     currency = "OMI"
                     dic_entry = historical_prices_dic[updated_timestamp_day]["OMI"]
+                elif order_json["buy"]["data"]["token_address"] == "0x4d224452801aced8b2f0aebe155379bb5d594381":
+                    currency = "APE"
+                    dic_entry = historical_prices_dic[updated_timestamp_day]["APE"]
+
+                elif order_json["buy"]["data"]["token_address"] == "0xe910c2a090516fb7a7be07f96a464785f2d5dc18":
+                    currency = "CMT"
+                    if "CMT" in historical_prices_dic[updated_timestamp_day]:
+                        dic_entry = historical_prices_dic[updated_timestamp_day]["CMT"]
+                    else:
+                        dic_entry = None
+                elif order_json["buy"]["data"]["token_address"] == "0x2caa4021e580b07d92adf8a40ec53b33a215d620":
+                    currency = "VCO"
+                    if "VCO" in historical_prices_dic[updated_timestamp_day]:
+                        dic_entry = historical_prices_dic[updated_timestamp_day]["VCO"]
+                    else:
+                        dic_entry = None
+                elif order_json["buy"]["data"]["token_address"] == "0x733b5056a0697e7a4357305fe452999a0c409feb":
+                    currency = "VCORE"
+                    if "VCORE" in historical_prices_dic[updated_timestamp_day]:
+                        dic_entry = historical_prices_dic[updated_timestamp_day]["VCORE"]
+                    else:
+                        dic_entry = None
+
                 else:
                     print(order_json["buy"]["data"]["token_address"])
                     print(json.dumps(order_json, indent=4))
@@ -178,6 +201,29 @@ class OrderFactoryGU:
                 elif order_json["sell"]["data"]["token_address"] == "0xed35af169af46a02ee13b9d79eb57d6d68c1749e":
                     currency = "OMI"
                     dic_entry = historical_prices_dic[updated_timestamp_day]["OMI"]
+                elif order_json["buy"]["data"]["token_address"] == "0x4d224452801aced8b2f0aebe155379bb5d594381":
+                    currency = "APE"
+                    dic_entry = historical_prices_dic[updated_timestamp_day]["APE"]
+
+                elif order_json["buy"]["data"]["token_address"] == "0xe910c2a090516fb7a7be07f96a464785f2d5dc18":
+                    currency = "CMT"
+                    if "CMT" in historical_prices_dic[updated_timestamp_day]:
+                        dic_entry = historical_prices_dic[updated_timestamp_day]["CMT"]
+                    else:
+                        dic_entry = None
+                elif order_json["buy"]["data"]["token_address"] == "0x2caa4021e580b07d92adf8a40ec53b33a215d620":
+                    currency = "VCO"
+                    if "VCO" in historical_prices_dic[updated_timestamp_day]:
+                        dic_entry = historical_prices_dic[updated_timestamp_day]["VCO"]
+                    else:
+                        dic_entry = None
+                elif order_json["buy"]["data"]["token_address"] == "0x733b5056a0697e7a4357305fe452999a0c409feb":
+                    currency = "VCORE"
+                    if "VCORE" in historical_prices_dic[updated_timestamp_day]:
+                        dic_entry = historical_prices_dic[updated_timestamp_day]["VCORE"]
+                    else:
+                        dic_entry = None
+
                 else:
                     print(order_json["sell"]["data"]["token_address"])
                     print(json.dumps(order_json, indent=4))

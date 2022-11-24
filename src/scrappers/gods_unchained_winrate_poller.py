@@ -3,26 +3,26 @@ import os
 
 import pytz
 
-from objects.win_rate.winrateadministrator import WinRateAdministrator
-from parallel_workers.parallel_rank_downloader import Parallel_Rank_Downloader
-from parallel_workers.parallel_win_rate_start_time_downloader import Parallel_Win_Rate_Start_Time_Downloader
+from src.objects.win_rate.winrateadministrator import WinRateAdministrator
+from src.parallel_workers.parallelrankdownloader import ParallelRankDownloader
+from src.parallel_workers.parallelwinratestarttimedownloader import ParallelWinRateStartTimeDownloader
 from datetime import datetime, timedelta
 
-from util.files.file_handler import File_Handler
-from util.helpers import Task_To_Console_Printer, SafeDatetimeConverter
-from util.to_download_list_creator import To_Download_List_Creator
+from src.util.files.filehandler import FileHandler
+from src.util.helpers import TaskToConsolePrinter, SafeDatetimeConverter
+from src.util.todownloadlistcreator import ToDownloadListCreator
 
 
 class Gods_Unchained_Winrate_Poller():
 
     def __init__(self):
-        self.pwrstd = Parallel_Win_Rate_Start_Time_Downloader()
-        self.prk = Parallel_Rank_Downloader()
+        self.pwrstd = ParallelWinRateStartTimeDownloader()
+        self.prk = ParallelRankDownloader()
 
 
     def download_latest_winrate(self):
 
-        winrate_info_raw_restart_path = File_Handler.get_base_path("card_win_rate_restart_info")
+        winrate_info_raw_restart_path = FileHandler.get_base_path("card_win_rate_restart_info")
 
         if os.path.isfile(winrate_info_raw_restart_path):
 
@@ -47,17 +47,17 @@ class Gods_Unchained_Winrate_Poller():
             difference = (current_time_stamp - start_time_stamp).total_seconds()
             if difference > 60:
 
-                time_stamp_str_list, next_start_time_stamp_str, new_not_caught_up_to_now = To_Download_List_Creator.create_timestamp_list(start_time_stamp, current_time_stamp, "download_win_rate")
+                time_stamp_str_list, next_start_time_stamp_str, new_not_caught_up_to_now = TaskToConsolePrinter.create_timestamp_list(start_time_stamp, current_time_stamp, "download_win_rate")
 
                 start_time_stamp_str = SafeDatetimeConverter.datetime_to_string(start_time_stamp)
 
-                Task_To_Console_Printer.print_downloading_task_info(status_string="WIN_RATE", get_type_string=None, from_str=start_time_stamp_str, to_str=time_stamp_str_list[-1][1])
+                TaskToConsolePrinter.print_downloading_task_info(status_string="WIN_RATE", get_type_string=None, from_str=start_time_stamp_str, to_str=time_stamp_str_list[-1][1])
 
                 win_rate_list = self.pwrstd.parallel_download_win_rate(time_stamp_str_list)
 
                 win_rate_list = sorted(win_rate_list, key= lambda x: x.unix_time_finished, reverse=False)
 
-                Task_To_Console_Printer.print_writing_warning("win_rate", get_type_string=None)
+                TaskToConsolePrinter.print_writing_warning("win_rate", get_type_string=None)
 
                 WinRateAdministrator.receive_winrate_list(win_rate_list, next_start_time_stamp_str)
 
@@ -79,7 +79,7 @@ class Gods_Unchained_Winrate_Poller():
 
     def _add_new_user_to_user_dic(self):
 
-        user_dic_path = File_Handler.get_base_path("user_ranking_dic")
+        user_dic_path = FileHandler.get_base_path("user_ranking_dic")
 
         if os.path.isfile(user_dic_path):
 
@@ -126,7 +126,7 @@ class Gods_Unchained_Winrate_Poller():
 
                 end_str = f"to {str(end_position)} out of {str(len(new_user_id_list))}"
 
-                Task_To_Console_Printer.print_downloading_task_info(status_string="USER_RANK", get_type_string=None, from_str=str(start_position), to_str=end_str)
+                TaskToConsolePrinter.print_downloading_task_info(status_string="USER_RANK", get_type_string=None, from_str=str(start_position), to_str=end_str)
 
                 rank_dic = self.prk.parallel_download_rank(next_portion_check)
 
@@ -135,7 +135,7 @@ class Gods_Unchained_Winrate_Poller():
                     new_entry["new"] = rank
                     user_dic[user_id] = new_entry
 
-                Task_To_Console_Printer.print_writing_warning(status_str="USER_RANK", get_type_string=None)
+                TaskToConsolePrinter.print_writing_warning(status_str="USER_RANK", get_type_string=None)
 
                 with open(user_dic_path, 'w', encoding='utf-8') as user_dic_file:
                     json.dump(user_dic, user_dic_file, ensure_ascii=False, indent=4)
@@ -153,7 +153,7 @@ class Gods_Unchained_Winrate_Poller():
 
     def _recreate_user_dic(self):
 
-        user_dic_path = File_Handler.get_base_path("user_ranking_dic")
+        user_dic_path = FileHandler.get_base_path("user_ranking_dic")
 
         with open(user_dic_path, 'r', encoding='utf-8') as user_dic_file:
             user_dic = json.load(user_dic_file)
@@ -184,7 +184,7 @@ class Gods_Unchained_Winrate_Poller():
 
                 end_str = f"to {str(end_position)} out of {str(len(new_user_id_list))}"
 
-                Task_To_Console_Printer.print_downloading_task_info(status_string="USER_RANK", get_type_string=None, from_str=str(start_position), to_str=end_str)
+                TaskToConsolePrinter.print_downloading_task_info(status_string="USER_RANK", get_type_string=None, from_str=str(start_position), to_str=end_str)
 
                 rank_dic = self.prk.parallel_download_rank(next_portion_check)
 
@@ -193,7 +193,7 @@ class Gods_Unchained_Winrate_Poller():
                     new_entry["new"] = rank
                     user_dic[user_id] = new_entry
 
-                Task_To_Console_Printer.print_writing_warning(status_str="USER_RANK", get_type_string=None)
+                TaskToConsolePrinter.print_writing_warning(status_str="USER_RANK", get_type_string=None)
 
                 with open(user_dic_path, 'w', encoding='utf-8') as user_dic_file:
                     json.dump(user_dic, user_dic_file, ensure_ascii=False, indent=4)
@@ -214,7 +214,7 @@ class Gods_Unchained_Winrate_Poller():
 
         print("Updating Rank of Users")
 
-        user_dic_path = File_Handler.get_base_path("user_ranking_dic")
+        user_dic_path = FileHandler.get_base_path("user_ranking_dic")
 
         if os.path.isfile(user_dic_path) == False:
             print("There is no user_dic to update")

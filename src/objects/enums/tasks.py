@@ -19,6 +19,8 @@ class DownloadTask(Enum):
     DOWN_DOUBLE_CHECKING = 8
     DOWN_MISSING_ORDERS = 9
 
+    DOWN_REQUEST_SCHEDULER = 10
+
 
 class ProcessingTask(Enum):
     PROCESSING_NEW_DATA = 1

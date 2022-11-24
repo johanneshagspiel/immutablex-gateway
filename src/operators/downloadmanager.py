@@ -60,7 +60,7 @@ class DownloadManager:
         """
         self.observer.inform(message, sender)
 
-    def download_order(self, get_type_string, status_string, historical_prices_file_dic):
+    def download_order(self, get_type_string, status_string, mode, historical_prices_file_dic):
         """
         A method to download orders
         :param get_type_string: the type of orders to be downloaded
@@ -90,7 +90,16 @@ class DownloadManager:
             start_time_stamp = datetime.strptime(next_start_time_stamp_str, "%Y-%m-%dT%H:%M:%S.%fZ")
 
         else:
-            start_time_stamp = datetime.strptime("2021-06-01T00:00:00.00Z", "%Y-%m-%dT%H:%M:%S.%fZ")
+
+            current_time_local = datetime.utcnow()
+            three_months_ago = current_time_local - timedelta(weeks=16)
+
+            year = three_months_ago.year
+            month = three_months_ago.month
+
+            start_three_month_ago = str(year) + "-" + str(month) + "-01T00:00:00.00Z"
+
+            start_time_stamp = datetime.strptime(start_three_month_ago, "%Y-%m-%dT%H:%M:%S.%fZ")
 
         print(f"Downloading {status_string} {get_type_string} Orders")
 
@@ -105,6 +114,7 @@ class DownloadManager:
             current_time_stamp = datetime.utcnow()
 
             difference = (current_time_stamp - start_time_stamp).total_seconds()
+
             if difference > 60:
 
                 not_yet_waiting_message_printed = True
@@ -114,16 +124,25 @@ class DownloadManager:
                 start_time_stamp_str = SafeDatetimeConverter.datetime_to_string(start_time_stamp)
 
                 try:
-                    TaskToConsolePrinter.print_downloading_task_info(status_string=status_string, get_type_string=get_type_string, from_str=start_time_stamp_str, to_str=time_stamp_str_list[-1][1])
+                    TaskToConsolePrinter.print_downloading_task_info(status_string=status_string,
+                                                                     get_type_string=get_type_string,
+                                                                     from_str=start_time_stamp_str,
+                                                                     to_str=time_stamp_str_list[-1][1])
 
-                    result = parallel_order_downloader.parallel_download_timestamp_orders(get_type_str=get_type_string, status_str=status_string, time_stamp_str_list=time_stamp_str_list)
+                    if mode == "un_scheduled":
+
+                        result = parallel_order_downloader.parallel_download_timestamp_orders(get_type_str=get_type_string, status_str=status_string, time_stamp_str_list=time_stamp_str_list)
+
                     current_time_stamp = datetime.utcnow()
 
                     TaskToConsolePrinter.print_writing_warning(status_str=status_string, get_type_string=get_type_string)
 
-                    OrderAdministratorGU.receive_orders_with_timestamp(get_type_string, status_string, result, start_time_stamp_str, next_start_time_stamp_str, historical_prices_file_dic, current_time_stamp)
+                    OrderAdministratorGU.receive_orders_with_timestamp(get_type_string, status_string, result,
+                                                                       start_time_stamp_str, next_start_time_stamp_str,
+                                                                       historical_prices_file_dic, current_time_stamp)
 
                     error_encountered = False
+
 
                 except (ResponseError, RequestError, TooManyAPICalls, InternalServerError, StartNewDayError) as custom_errors:
                     self.notify_observers(custom_errors, sender_name)

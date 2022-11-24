@@ -37,7 +37,7 @@ class CoinMarketCapScrapper:
 
         url = 'https://pro-api.coinmarketcap.com/v1/cryptocurrency/quotes/latest'
         parameters = {
-            'symbol': "ETH,GODS,IMX,USDC,GOG,OMI",
+            'symbol': "ETH,GODS,IMX,USDC,GOG,OMI,APE,CMT,VCO,VCORE",
             'convert': 'EUR'
         }
         headers = {
@@ -66,6 +66,12 @@ class CoinMarketCapScrapper:
 
         final_dic = {}
         final_dic["prices"] = cleaned_dic
+
+        currencies = ["ETH", "GODS", "IMX", "USDC", "GOG", "OMI", "APE", "CMT", "VCO", "VCORE"]
+
+        for currency in currencies:
+            if currency not in final_dic["prices"]:
+                final_dic["prices"][currency] = 0
 
         current_time = datetime.datetime.now()
         utc_time = current_time.astimezone(pytz.utc).isoformat().replace("+00:00", "Z")

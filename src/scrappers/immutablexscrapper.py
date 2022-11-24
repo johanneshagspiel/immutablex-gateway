@@ -1,6 +1,11 @@
 import json
+import random
+import time
+import traceback
 from datetime import datetime
 import requests
+from ratelimiter import RateLimiter
+
 from src.util.custom_exceptions import RequestError, TooManyAPICalls, ResponseError, InternalServerError
 from src.util.url.urlcreator import UrlCreator
 
@@ -14,7 +19,12 @@ class ImmutableXScrapper:
         """
         The constructor of the ImmutableXScrapper class
         """
-        pass
+        self.request_scheduler = None
+        self.waiting = True
+
+    def set_request_scheduler(self, request_scheduler):
+        self.request_scheduler = request_scheduler
+
 
     def make_get_request(self, url, checking_for_internal_errors=True, add_download_time_info=False, write_errors=False, timeout_duration=None):
         """
@@ -27,13 +37,25 @@ class ImmutableXScrapper:
         :return: the result
         """
 
+        return self.download_get_request(url, checking_for_internal_errors, add_download_time_info, write_errors, timeout_duration)
+
+
+    @RateLimiter(max_calls=10, period=1)
+    def make_one_request(self, url, headers, timeout_duration):
+
+        return requests.request("GET", url, headers=headers, timeout=timeout_duration)
+
+    def download_get_request(self, url, checking_for_internal_errors=True, add_download_time_info=False, write_errors=False, timeout_duration=None):
+
         headers = {"User-Agent" : "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/97.0.4692.99 Safari/537.36", "Accept-Language" : "en-US", "Accept": "application/json"}
 
         result_list = []
 
         try:
-            response = requests.request("GET", url, headers=headers, timeout=timeout_duration)
+            #response = requests.request("GET", url, headers=headers, timeout=timeout_duration)
+            response = self.make_one_request(url=url, headers=headers, timeout_duration=timeout_duration)
         except Exception as e:
+            traceback.print_exc()
             raise RequestError(type(e), url, write_errors)
 
         # download_not_finished = True
@@ -69,9 +91,11 @@ class ImmutableXScrapper:
                         next_url = UrlCreator.create_next_cursor_url(url, next_cursor_url)
 
                         try:
-                            next_response = requests.request("GET", next_url, headers=headers, timeout=timeout_duration)
+                            #next_response = requests.request("GET", next_url, headers=headers, timeout=timeout_duration)
+                            next_response = self.make_one_request(url=next_url, headers=headers, timeout_duration=timeout_duration)
                         except Exception as e:
-                            raise RequestError(type(e), url, write_errors)
+                            traceback.print_exc()
+                            raise RequestError(type(e), next_url, write_errors)
 
                         # download_not_finished = True
                         # while download_not_finished:

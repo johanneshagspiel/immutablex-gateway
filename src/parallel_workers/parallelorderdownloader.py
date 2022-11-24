@@ -14,7 +14,7 @@ class ParallelOrderDownloader:
         self._GodsUnchainedPoller = GodsUnchainedPoller()
         self._shut_down = False
 
-    def parallel_download_timestamp_orders(self, get_type_str, status_str, time_stamp_str_list):
+    def parallel_download_timestamp_orders(self, get_type_str, status_str, time_stamp_str_list, request_scheduler=None):
         """
         A method to parallel download orders based on a list of timestamps
         :param get_type_str: the type of order i.e. buy
@@ -22,6 +22,9 @@ class ParallelOrderDownloader:
         :param time_stamp_str_list: a list of timestamps to be downloaded
         :return: the result list
         """
+
+        if request_scheduler != None:
+            self._GodsUnchainedPoller.set_request_scheduler(request_scheduler=request_scheduler)
 
         connections = len(time_stamp_str_list)
         result = []

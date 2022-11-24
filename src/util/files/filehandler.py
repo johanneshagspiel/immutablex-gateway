@@ -190,6 +190,11 @@ class FileHandler:
 		"pk_info_file":  _root.joinpath("resources", "client_info", "pk_info.json"),
 		"coinmarketcap_info_file":  _root.joinpath("resources", "client_info", "coinmarketcap_info.json"),
 		"coinapi_info_file": _root.joinpath("resources", "client_info", "coinapi_info.json"),
+		"mysql_info_file": _root.joinpath("resources", "client_info", "mysql_info.json"),
+
+		"currency_overview_file": _root.joinpath("resources", "currency_assets", "currency_overview.json"),
+
+		"settings_file_path": _root.joinpath("resources", "settings", "settings.json"),
 
 		"sales_history": _root.joinpath("resources", "sales_history", "sales_history.csv"),
 
@@ -253,6 +258,22 @@ class FileHandler:
 					coinapi_info_dic["api_key"] = ""
 					with open(path, 'w') as fp:
 						fp.write(json.dumps(coinapi_info_dic, indent=4))
+
+				elif file_name == "mysql_info.json":
+					mysql_info_dic = {}
+					mysql_info_dic["db"] = ""
+					mysql_info_dic["user"] = ""
+					mysql_info_dic["passwrd"] = ""
+					mysql_info_dic["localhost"] = ""
+					mysql_info_dic["port"] = ""
+					with open(path, 'w') as fp:
+						fp.write(json.dumps(mysql_info_dic, indent=4))
+
+				elif file_name == "settings.json":
+					settings_dic = {}
+					settings_dic["storage"] = "json"
+					with open(path, 'w') as fp:
+						fp.write(json.dumps(settings_dic, indent=4))
 
 				elif file_extension == ".json":
 					with open(path, 'w') as fp:

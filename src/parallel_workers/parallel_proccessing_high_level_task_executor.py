@@ -31,37 +31,20 @@ class ParallelProcessingHighLevelTaskExecutor:
 
         self._wait_to_to_shutdown = True
 
-    def run(self, mode):
+    def run(self, task_list, mode):
         """
         A method to run a list of high level tasks
         :param mode: whether to execute download or processing tasks
         :return: None
         """
 
-        combined_DownloadTask_list = [DownloadTask.DOWN_ACTIVE_SELL_ORDERS, DownloadTask.DOWN_FILLED_SELL_ORDERS, DownloadTask.DOWN_CANCELLED_SELL_ORDERS,
-                                       DownloadTask.DOWN_ACTIVE_BUY_ORDERS, DownloadTask.DOWN_FILLED_BUY_ORDERS, DownloadTask.DOWN_CANCELLED_BUY_ORDERS,
-                                       DownloadTask.DOWN_MISSING_ORDERS
-                                       ]
-
-        sell_DownloadTask_list = [DownloadTask.DOWN_ACTIVE_SELL_ORDERS, DownloadTask.DOWN_FILLED_SELL_ORDERS, DownloadTask.DOWN_CANCELLED_SELL_ORDERS,
-                                   DownloadTask.DOWN_WIN_RATE]
-
-        win_rate_list = [DownloadTask.DOWN_WIN_RATE]
-        double_checking_list = [DownloadTask.DOWN_DOUBLE_CHECKING]
-        missing_list = [DownloadTask.DOWN_MISSING_ORDERS]
-
-        test_1 = [DownloadTask.DOWN_CANCELLED_BUY_ORDERS]
-        test_2 = [DownloadTask.DOWN_CANCELLED_BUY_ORDERS]
-
-        process_task_list = [ProcessingTask.PROCESSING_NEW_DATA]
-
         if mode == "download":
-            task_list = [(HighLevelTask.DOWNLOAD_TASK, sell_DownloadTask_list)]
+            final_task_list = [(HighLevelTask.DOWNLOAD_TASK, task_list)]
         elif mode == "process":
-            task_list = [(HighLevelTask.PROCESS_TASK, process_task_list)]
+            final_task_list = [(HighLevelTask.PROCESS_TASK, task_list)]
 
         try:
-            self.parallel_execute_high_level_task(task_list=task_list)
+            self.parallel_execute_high_level_task(task_list=final_task_list)
 
         except KeyboardInterrupt:
             print("Shutting down")
@@ -88,19 +71,19 @@ class ParallelProcessingHighLevelTaskExecutor:
         """
         amount_tasks = len(task_list)
 
-        HighLevelTask_list = [entry[0] for entry in task_list]
-
-        if HighLevelTask.DOWNLOAD_TASK in HighLevelTask_list:
-
-            print("Is Nordvpn on? Type yes to continue")
-
-            answer = input()
-
-            if answer == "yes":
-                self._ConnectionManager.switch_ip(not_first_time=False)
-            else:
-                print("Nordvpn is not on - therefore the programme shuts down")
-                sys.exit()
+        # HighLevelTask_list = [entry[0] for entry in task_list]
+        #
+        # if HighLevelTask.DOWNLOAD_TASK in HighLevelTask_list:
+        #
+        #     print("Is Nordvpn on? Type yes to continue")
+        #
+        #     answer = input()
+        #
+        #     if answer == "yes":
+        #         self._ConnectionManager.switch_ip(not_first_time=False)
+        #     else:
+        #         print("Nordvpn is not on - therefore the programme shuts down")
+        #         sys.exit()
 
         executor = concurrent.futures.ThreadPoolExecutor(max_workers=amount_tasks)
         future_list = []
@@ -154,7 +137,7 @@ class ParallelProcessingHighLevelTaskExecutor:
         if isinstance(information, (ResponseError, RequestError, TooManyAPICalls, InternalServerError)):
             print(" ")
             print(information)
-            self._ConnectionManager.switch_ip()
+            #self._ConnectionManager.switch_ip()
             self._ParallelDownloadTaskExecutor.restart()
 
         elif isinstance(information, StartNewDayError):

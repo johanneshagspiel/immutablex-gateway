@@ -11,6 +11,7 @@ from src.objects.enums.gettype import GetType
 from src.objects.enums.status import Status
 from src.objects.orders.gods_unchained.orderfactorygu import OrderFactoryGU
 from src.operators.helpers.missedordershelper import MissedOrdersHelper
+from src.operators.mysql_connector import MysqlConnector
 from src.scrappers.coinmarketcapscrapper import CoinMarketCapScrapper
 from src.util.custom_exceptions import StartNewDayError
 from src.util.files.filehandler import FileHandler
@@ -24,14 +25,27 @@ class OrderAdministratorGU:
     The class that converts downloaded information into Orders and stores them appropriately
     """
 
+    _settings_file_path = FileHandler.get_base_path("settings_file_path")
+    with open(_settings_file_path, 'r', encoding='utf-8') as settings_file:
+        settings_dic = json.load(settings_file)
+    settings_file.close()
+
+    storage = settings_dic["storage"]
+    if len(storage) == 0:
+        raise Exception("No name of the MYSQL database was found - add it to resources/settings/settings.json")
+
+    if storage == "mysql":
+        mysqlconnector = MysqlConnector()
+
     def __init__(self):
         """
         The constructor of the OrderAdministratorGU
         """
         pass
 
-    @staticmethod
-    def receive_orders_with_timestamp(get_type_string, status_string, result_list, start_time_stamp_str,
+
+    @classmethod
+    def receive_orders_with_timestamp(cls, get_type_string, status_string, result_list, start_time_stamp_str,
                                       next_start_time_stamp_str, historical_prices_file_dic, timestamp_before_download):
         """
         The method to convert the orders downloaded based on a from and to timestamp into Orders
@@ -88,42 +102,199 @@ class OrderAdministratorGU:
 
         restart_info_path = FileHandler.get_restart_info_path(get_type, status, "ROLLING")
 
-        if os.path.isfile(restart_info_path):
+        if cls.storage == "json":
 
-            with open(restart_info_path, 'r', encoding='utf-8') as restart_info_file:
-                previous_restart_dic = json.load(restart_info_file)
-            restart_info_file.close()
+            if os.path.isfile(restart_info_path):
 
-            restart_info_dic = {}
-            restart_info_dic["start_time_stamp"] = start_time_stamp_str
-            restart_info_dic["next_start_time_stamp"] = next_start_time_stamp_str
+                with open(restart_info_path, 'r', encoding='utf-8') as restart_info_file:
+                    previous_restart_dic = json.load(restart_info_file)
+                restart_info_file.close()
 
-            latest_split_file_number = previous_restart_dic["latest_split_file_number"]
-            latest_new_file_dic = previous_restart_dic["new_file_dic"]
+                restart_info_dic = {}
+                restart_info_dic["start_time_stamp"] = start_time_stamp_str
+                restart_info_dic["next_start_time_stamp"] = next_start_time_stamp_str
 
-            if len(order_object_list) > 0:
+                latest_split_file_number = previous_restart_dic["latest_split_file_number"]
+                latest_new_file_dic = previous_restart_dic["new_file_dic"]
 
-                last_seen_order_object = order_object_list[-1]
+                if len(order_object_list) > 0:
 
-                last_seen_updated_timestamp = SafeDatetimeConverter.datetime_to_string(
-                    timestamp=last_seen_order_object.updated_timestamp)
-                last_seen_order_id = last_seen_order_object.order_id
+                    last_seen_order_object = order_object_list[-1]
 
-                restart_info_dic["last_seen_order_id"] = last_seen_order_id
-                restart_info_dic["last_seen_updated_timestamp"] = last_seen_updated_timestamp
+                    last_seen_updated_timestamp = SafeDatetimeConverter.datetime_to_string(
+                        timestamp=last_seen_order_object.updated_timestamp)
+                    last_seen_order_id = last_seen_order_object.order_id
+
+                    restart_info_dic["last_seen_order_id"] = last_seen_order_id
+                    restart_info_dic["last_seen_updated_timestamp"] = last_seen_updated_timestamp
+                else:
+                    restart_info_dic["last_seen_order_id"] = previous_restart_dic["last_seen_order_id"]
+                    restart_info_dic["last_seen_updated_timestamp"] = previous_restart_dic[
+                        "last_seen_updated_timestamp"]
+
+                    restart_info_dic["latest_split_file_number"] = previous_restart_dic["latest_split_file_number"]
+                    restart_info_dic["new_file_dic"] = previous_restart_dic["new_file_dic"]
+
             else:
-                restart_info_dic["last_seen_order_id"] = previous_restart_dic["last_seen_order_id"]
-                restart_info_dic["last_seen_updated_timestamp"] = previous_restart_dic["last_seen_updated_timestamp"]
+                restart_info_dic = {}
+                restart_info_dic["start_time_stamp"] = start_time_stamp_str
+                restart_info_dic["next_start_time_stamp"] = next_start_time_stamp_str
 
-                restart_info_dic["latest_split_file_number"] = previous_restart_dic["latest_split_file_number"]
-                restart_info_dic["new_file_dic"] = previous_restart_dic["new_file_dic"]
+                latest_split_file_number = 0
 
-        else:
+                if len(order_object_list) > 0:
+
+                    last_seen_order_object = order_object_list[-1]
+                    last_seen_updated_timestamp = SafeDatetimeConverter.datetime_to_string(
+                        timestamp=last_seen_order_object.updated_timestamp)
+                    last_seen_order_id = last_seen_order_object.order_id
+
+                    first_seen_order_object = order_object_list[0]
+                    first_seen_updated_timestamp = SafeDatetimeConverter.datetime_to_string(
+                        timestamp=first_seen_order_object.updated_timestamp)
+                    first_seen_order_id = first_seen_order_object.order_id
+
+                    restart_info_dic["last_seen_order_id"] = last_seen_order_id
+                    restart_info_dic["last_seen_updated_timestamp"] = last_seen_updated_timestamp
+                    restart_info_dic["latest_split_file_number"] = 0
+                    restart_info_dic["new_file_dic"] = {}
+
+                    new_file_dic_entry = {}
+                    new_file_dic_entry["first_order_id"] = first_seen_order_id
+                    new_file_dic_entry["first_order_updated_timestamp"] = first_seen_updated_timestamp
+                    new_file_dic_entry["last_order_id"] = None
+                    new_file_dic_entry["last_order_updated_timestamp"] = None
+                    new_file_dic_entry["number_lines"] = 0
+
+                    restart_info_dic["new_file_dic"]['0'] = new_file_dic_entry
+                    latest_new_file_dic = restart_info_dic["new_file_dic"]
+
+                else:
+                    restart_info_dic["last_seen_order_id"] = None
+                    restart_info_dic["last_seen_updated_timestamp"] = None
+                    restart_info_dic["latest_split_file_number"] = 0
+                    restart_info_dic["new_file_dic"] = {}
+
+                    new_file_dic_entry = {}
+                    new_file_dic_entry["first_order_id"] = None
+                    new_file_dic_entry["first_order_updated_timestamp"] = None
+                    new_file_dic_entry["last_order_id"] = None
+                    new_file_dic_entry["last_order_updated_timestamp"] = None
+                    new_file_dic_entry["number_lines"] = 0
+
+                    restart_info_dic["new_file_dic"]['0'] = new_file_dic_entry
+                    latest_new_file_dic = restart_info_dic["new_file_dic"]
+
+            if len(order_object_list) > 0:
+
+                base_path = FileHandler.get_store_path(get_type, status, "ROLLING")
+                start_file_name = status_string.lower() + "_" + get_type_string.lower() + "_orders_rolling"
+
+                latest_split_file_number_str = str(latest_split_file_number)
+
+                if latest_split_file_number_str in latest_new_file_dic:
+                    previous_number_lines = latest_new_file_dic[latest_split_file_number_str]["number_lines"]
+                else:
+                    previous_number_lines = 0
+
+                previous_latest_split_file_number = latest_split_file_number
+                current_new_file_list_index = previous_latest_split_file_number
+
+                total_new_file_list = []
+                total_new_file_list.append((current_new_file_list_index, []))
+                list_index = 0
+
+                for line_index, new_order in enumerate(order_object_list):
+
+                    updated_line_index = line_index + previous_number_lines
+
+                    if (updated_line_index % 500000 == 0) and (updated_line_index != 0):
+                        current_new_file_list_index = current_new_file_list_index + 1
+                        total_new_file_list.append((current_new_file_list_index, []))
+                        list_index = list_index + 1
+
+                    total_new_file_list[list_index][1].append(new_order)
+
+                file_name_list = []
+                for current_new_file_list_index, new_file_list in total_new_file_list:
+                    new_file_name = start_file_name + "_" + str(current_new_file_list_index) + ".json"
+                    file_name_list.append(new_file_name)
+                    new_file_store_path = str(base_path) + '\\' + new_file_name
+
+                    first_order_as_json = new_file_list[0]
+                    first_order_id = first_order_as_json.order_id
+                    first_order_updated_timestamp = SafeDatetimeConverter.datetime_to_string(
+                        timestamp=first_order_as_json.updated_timestamp)
+
+                    last_order_as_json = new_file_list[-1]
+                    last_order_id = last_order_as_json.order_id
+                    last_order_updated_timestamp = SafeDatetimeConverter.datetime_to_string(
+                        timestamp=last_order_as_json.updated_timestamp)
+
+                    latest_split_file_number = current_new_file_list_index
+                    current_new_file_list_index_str = str(current_new_file_list_index)
+
+                    if current_new_file_list_index == previous_latest_split_file_number:
+                        latest_new_file_dic[current_new_file_list_index_str]["number_lines"] = \
+                            len(new_file_list) + latest_new_file_dic[current_new_file_list_index_str]["number_lines"]
+                    else:
+                        latest_new_file_dic[current_new_file_list_index_str] = {}
+                        latest_new_file_dic[current_new_file_list_index_str]["first_order_id"] = first_order_id
+                        latest_new_file_dic[current_new_file_list_index_str][
+                            "first_order_updated_timestamp"] = first_order_updated_timestamp
+                        latest_new_file_dic[current_new_file_list_index_str]["number_lines"] = len(new_file_list)
+
+                    latest_new_file_dic[current_new_file_list_index_str]["last_order_id"] = last_order_id
+                    latest_new_file_dic[current_new_file_list_index_str][
+                        "last_order_updated_timestamp"] = last_order_updated_timestamp
+
+                    with open(new_file_store_path, 'a', encoding='utf-8') as new_file:
+                        for order_object in new_file_list:
+                            if order_object != None:
+                                json.dump(json.dumps(order_object.to_print_dic()), new_file, ensure_ascii=False,
+                                          indent=4)
+                                new_file.write("\n")
+                    new_file.close()
+
+                restart_info_dic["latest_split_file_number"] = latest_split_file_number
+                restart_info_dic["new_file_dic"] = latest_new_file_dic
+
+                with open(restart_info_path, 'w', encoding='utf-8') as restart_info_file:
+                    json.dump(restart_info_dic, restart_info_file, ensure_ascii=False, indent=4)
+                restart_info_file.close()
+
+                order_id_base_path = FileHandler.get_base_path("to_be_processed_downloaded_order_id_folder")
+                to_be_processed_downloaded_order_id_path = str(
+                    order_id_base_path) + "\\to_be_processed_" + status_string.lower() + "_" + get_type_string.lower() + "_order_ids.json"
+
+                order_id_list = [x.order_id for x in order_object_list]
+
+                FileIoHelper.write_timestamp_log(get_type_string, status_string, log_list, file_name_list)
+                FileIoHelper.write_to_be_processed_order_ids(order_id_list, to_be_processed_downloaded_order_id_path)
+
+                to_be_processed_path = FileHandler.get_store_path(get_type, status, "TO_BE_PROCESSED")
+
+                with open(to_be_processed_path, 'a', encoding='utf-8') as to_be_processed_file:
+                    for order_object in order_object_list:
+                        if order_object != None:
+                            json.dump(json.dumps(order_object.to_print_dic()), to_be_processed_file, ensure_ascii=False,
+                                      indent=4)
+                            to_be_processed_file.write("\n")
+                to_be_processed_file.close()
+
+            else:
+                with open(restart_info_path, 'w', encoding='utf-8') as restart_info_file:
+                    json.dump(restart_info_dic, restart_info_file, ensure_ascii=False, indent=4)
+                restart_info_file.close()
+
+                FileIoHelper.write_timestamp_log(get_type_string, status_string, log_list)
+
+
+        elif cls.storage == "mysql":
+
             restart_info_dic = {}
             restart_info_dic["start_time_stamp"] = start_time_stamp_str
             restart_info_dic["next_start_time_stamp"] = next_start_time_stamp_str
-
-            latest_split_file_number = 0
 
             if len(order_object_list) > 0:
 
@@ -132,140 +303,42 @@ class OrderAdministratorGU:
                     timestamp=last_seen_order_object.updated_timestamp)
                 last_seen_order_id = last_seen_order_object.order_id
 
-                first_seen_order_object = order_object_list[0]
-                first_seen_updated_timestamp = SafeDatetimeConverter.datetime_to_string(
-                    timestamp=first_seen_order_object.updated_timestamp)
-                first_seen_order_id = first_seen_order_object.order_id
-
                 restart_info_dic["last_seen_order_id"] = last_seen_order_id
                 restart_info_dic["last_seen_updated_timestamp"] = last_seen_updated_timestamp
-                restart_info_dic["latest_split_file_number"] = 0
-                restart_info_dic["new_file_dic"] = {}
-
-                new_file_dic_entry = {}
-                new_file_dic_entry["first_order_id"] = first_seen_order_id
-                new_file_dic_entry["first_order_updated_timestamp"] = first_seen_updated_timestamp
-                new_file_dic_entry["last_order_id"] = None
-                new_file_dic_entry["last_order_updated_timestamp"] = None
-                new_file_dic_entry["number_lines"] = 0
-
-                restart_info_dic["new_file_dic"]['0'] = new_file_dic_entry
-                latest_new_file_dic = restart_info_dic["new_file_dic"]
 
             else:
                 restart_info_dic["last_seen_order_id"] = None
                 restart_info_dic["last_seen_updated_timestamp"] = None
-                restart_info_dic["latest_split_file_number"] = 0
-                restart_info_dic["new_file_dic"] = {}
 
-                new_file_dic_entry = {}
-                new_file_dic_entry["first_order_id"] = None
-                new_file_dic_entry["first_order_updated_timestamp"] = None
-                new_file_dic_entry["last_order_id"] = None
-                new_file_dic_entry["last_order_updated_timestamp"] = None
-                new_file_dic_entry["number_lines"] = 0
 
-                restart_info_dic["new_file_dic"]['0'] = new_file_dic_entry
-                latest_new_file_dic = restart_info_dic["new_file_dic"]
+            if len(order_object_list) > 0:
 
-        if len(order_object_list) > 0:
+                cls.mysqlconnector.insert_list_of_gu_orders(order_object_list, "gu_orders")
 
-            base_path = FileHandler.get_store_path(get_type, status, "ROLLING")
-            start_file_name = status_string.lower() + "_" + get_type_string.lower() + "_orders_rolling"
+                with open(restart_info_path, 'w', encoding='utf-8') as restart_info_file:
+                    json.dump(restart_info_dic, restart_info_file, ensure_ascii=False, indent=4)
+                restart_info_file.close()
 
-            latest_split_file_number_str = str(latest_split_file_number)
+                order_id_list = [x.order_id for x in order_object_list]
 
-            if latest_split_file_number_str in latest_new_file_dic:
-                previous_number_lines = latest_new_file_dic[latest_split_file_number_str]["number_lines"]
+                FileIoHelper.write_timestamp_log(get_type_string, status_string, log_list, ["mysql"])
+
+                order_id_base_path = FileHandler.get_base_path("to_be_processed_downloaded_order_id_folder")
+                to_be_processed_downloaded_order_id_path = str(
+                    order_id_base_path) + "\\to_be_processed_" + status_string.lower() + "_" + get_type_string.lower() + "_order_ids.json"
+
+                FileIoHelper.write_to_be_processed_order_ids(order_id_list,
+                                                             to_be_processed_downloaded_order_id_path)
+
+                cls.mysqlconnector.insert_list_of_gu_orders(order_object_list, "to_be_processed_gu_orders")
+
+
             else:
-                previous_number_lines = 0
+                with open(restart_info_path, 'w', encoding='utf-8') as restart_info_file:
+                    json.dump(restart_info_dic, restart_info_file, ensure_ascii=False, indent=4)
+                restart_info_file.close()
 
-            previous_latest_split_file_number = latest_split_file_number
-            current_new_file_list_index = previous_latest_split_file_number
-
-            total_new_file_list = []
-            total_new_file_list.append((current_new_file_list_index, []))
-            list_index = 0
-
-            for line_index, new_order in enumerate(order_object_list):
-
-                updated_line_index = line_index + previous_number_lines
-
-                if (updated_line_index  % 500000 == 0) and (updated_line_index != 0):
-                    current_new_file_list_index = current_new_file_list_index + 1
-                    total_new_file_list.append((current_new_file_list_index, []))
-                    list_index = list_index + 1
-
-                total_new_file_list[list_index][1].append(new_order)
-
-            file_name_list = []
-            for current_new_file_list_index, new_file_list in total_new_file_list:
-                new_file_name = start_file_name + "_" + str(current_new_file_list_index) + ".json"
-                file_name_list.append(new_file_name)
-                new_file_store_path = str(base_path) + '\\' + new_file_name
-
-                first_order_as_json = new_file_list[0]
-                first_order_id = first_order_as_json.order_id
-                first_order_updated_timestamp = SafeDatetimeConverter.datetime_to_string(
-                    timestamp=first_order_as_json.updated_timestamp)
-
-                last_order_as_json = new_file_list[-1]
-                last_order_id = last_order_as_json.order_id
-                last_order_updated_timestamp = SafeDatetimeConverter.datetime_to_string(
-                    timestamp=last_order_as_json.updated_timestamp)
-
-                latest_split_file_number = current_new_file_list_index
-                current_new_file_list_index_str = str(current_new_file_list_index)
-
-                if current_new_file_list_index == previous_latest_split_file_number:
-                    latest_new_file_dic[current_new_file_list_index_str]["number_lines"] = \
-                        len(new_file_list) + latest_new_file_dic[current_new_file_list_index_str]["number_lines"]
-                else:
-                    latest_new_file_dic[current_new_file_list_index_str] = {}
-                    latest_new_file_dic[current_new_file_list_index_str]["first_order_id"] = first_order_id
-                    latest_new_file_dic[current_new_file_list_index_str]["first_order_updated_timestamp"] = first_order_updated_timestamp
-                    latest_new_file_dic[current_new_file_list_index_str]["number_lines"] = len(new_file_list)
-
-                latest_new_file_dic[current_new_file_list_index_str]["last_order_id"] = last_order_id
-                latest_new_file_dic[current_new_file_list_index_str]["last_order_updated_timestamp"] = last_order_updated_timestamp
-
-                with open(new_file_store_path, 'a', encoding='utf-8') as new_file:
-                    for order_object in new_file_list:
-                        if order_object != None:
-                            json.dump(json.dumps(order_object.to_print_dic()), new_file, ensure_ascii=False, indent=4)
-                            new_file.write("\n")
-                new_file.close()
-
-            restart_info_dic["latest_split_file_number"] = latest_split_file_number
-            restart_info_dic["new_file_dic"] = latest_new_file_dic
-
-            with open(restart_info_path, 'w', encoding='utf-8') as restart_info_file:
-                json.dump(restart_info_dic, restart_info_file, ensure_ascii=False, indent=4)
-            restart_info_file.close()
-
-            order_id_base_path = FileHandler.get_base_path("to_be_processed_downloaded_order_id_folder")
-            to_be_processed_downloaded_order_id_path = str(order_id_base_path) + "\\to_be_processed_" + status_string.lower() + "_" + get_type_string.lower() + "_order_ids.json"
-
-            order_id_list = [x.order_id for x in order_object_list]
-
-            FileIoHelper.write_timestamp_log(get_type_string, status_string, log_list, file_name_list)
-            FileIoHelper.write_to_be_processed_order_ids(order_id_list, to_be_processed_downloaded_order_id_path)
-
-            to_be_processed_path = FileHandler.get_store_path(get_type, status, "TO_BE_PROCESSED")
-
-            with open(to_be_processed_path, 'a', encoding='utf-8') as to_be_processed_file:
-                for order_object in order_object_list:
-                    if order_object != None:
-                        json.dump(json.dumps(order_object.to_print_dic()), to_be_processed_file, ensure_ascii=False, indent=4)
-                        to_be_processed_file.write("\n")
-            to_be_processed_file.close()
-
-        else:
-            with open(restart_info_path, 'w', encoding='utf-8') as restart_info_file:
-                json.dump(restart_info_dic, restart_info_file, ensure_ascii=False, indent=4)
-            restart_info_file.close()
-
-            FileIoHelper.write_timestamp_log(get_type_string, status_string, log_list)
+                FileIoHelper.write_timestamp_log(get_type_string, status_string, log_list)
 
 
     @staticmethod

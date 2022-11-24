@@ -28,6 +28,18 @@ class CancelledOrderGU:
         self.timestamp = timestamp
         self.updated_timestamp = updated_timestamp
 
+
+    def to_tuple(self):
+        """
+        Method to convert on instance of a cancelled Order to a tuple so that it can be inserted into an MYSQL database
+        :return: the instance of the Order as a tuple
+        """
+
+        return (self.order_id, self.user, self.token_id, None, self.status, self.type, None, None, None, None, None,
+                 None, SafeDatetimeConverter.datetime_to_string(self.timestamp),
+                 SafeDatetimeConverter.datetime_to_string(self.updated_timestamp))
+
+
     def to_print_dic(self):
         """
         A method to convert a cancelled order into a string to be printed

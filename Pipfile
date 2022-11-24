@@ -13,6 +13,9 @@ pydantic = "*"
 urlpath = "*"
 typingx = "*"
 objects = "*"
+mysql = "*"
+mysql-connector-python = "*"
+ratelimiter = "*"
 
 [dev-packages]
 

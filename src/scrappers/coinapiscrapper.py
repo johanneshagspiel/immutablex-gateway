@@ -59,7 +59,11 @@ class CoinAPIScrapper:
         """
 
         day_list = sorted([key for key, value in historical_prices_file_dic.items()], reverse=True)
-        last_day = day_list[0]
+
+        if len(day_list) > 0:
+            last_day = day_list[0]
+        else:
+            last_day = "2021-01-01"
 
         return last_day
 
@@ -84,7 +88,7 @@ class CoinAPIScrapper:
             historical_prices_dic = json.load(historical_prices_file)
         historical_prices_file.close()
 
-        currencies = ["ETH", "GODS", "IMX", "USDC", "GOG", "OMI"]
+        currencies = ["ETH", "GODS", "IMX", "USDC", "GOG", "OMI", "APE", "CMT", "VCO", "VCORE"]
 
         for currency_index, currency in enumerate(currencies):
 
@@ -109,7 +113,8 @@ class CoinAPIScrapper:
                 price = entry["rate_open"]
 
                 if day not in historical_prices_dic:
-                    temp_dic = {"ETH": None, "GODS": None, "IMX": None, "USDC": None, "GOG": None, "OMI": None}
+                    temp_dic = {"ETH": None, "GODS": None, "IMX": None, "USDC": None, "GOG": None, "OMI": None,
+                                "APE": None, "CMT": None, "VCO": None, "VCORE": None}
                     temp_dic[currency] = price
                     historical_prices_dic[day] = temp_dic
                 else:

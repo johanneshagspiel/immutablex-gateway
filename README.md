@@ -31,13 +31,15 @@ All of these tasks are parallelized and thus once all orders up to the current m
 
 ## Tools
 
-| Purpose                | Name                                                         |
-|------------------------|--------------------------------------------------------------|
-| Programming language   | [Python 3.10](https://www.python.org/)                       |
-| Dependency manager     | [Pipenv](https://pipenv.pypa.io/en/latest/)                  |
-| Version control system | [Git](https://git-scm.com/)                                  |
-| Testing framework      | [unittest](https://docs.python.org/3/library/unittest.html/) |
-| IMX SDK 		             | [imxpy](https://github.com/Dimfred/imxpy/)   |
+| Purpose                                    | Name                                                         |
+|--------------------------------------------|--------------------------------------------------------------|
+| Programming language                       | [Python 3.10](https://www.python.org/)                       |
+| Dependency manager                         | [Pipenv](https://pipenv.pypa.io/en/latest/)                  |
+| Version control system                     | [Git](https://git-scm.com/)                                  |
+| Testing framework                          | [unittest](https://docs.python.org/3/library/unittest.html/) |
+| IMX SDK 		                                 | [imxpy](https://github.com/Dimfred/imxpy/)                   |
+| Data analysis library 		                   | [pandas](https://pandas.pydata.org/)                         |
+| Relational database management system  		 | [MySQL](https://www.mysql.com/)                              |
 
 ## Requirements
 

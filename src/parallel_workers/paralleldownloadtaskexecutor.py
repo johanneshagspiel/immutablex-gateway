@@ -4,6 +4,7 @@ import traceback
 from src.objects.enums.tasks import DownloadTask
 from src.operators.downloadmanager import DownloadManager
 from src.operators.helpers.doublecheckinghelper import DoubleCheckingHelper
+from src.operators.requestscheduler import RequestScheduler
 from src.scrappers.coinapiscrapper import CoinAPIScrapper
 from src.scrappers.gods_unchained_winrate_poller import Gods_Unchained_Winrate_Poller
 from src.util.files.fileiohelper import FileIoHelper
@@ -24,7 +25,9 @@ class ParallelDownloadTaskExecutor:
         self.observer = None
 
         self._guwp = Gods_Unchained_Winrate_Poller()
+
         self._DownloadManager = DownloadManager()
+
         self._DownloadManager.observer = self
 
         self._status_dic = {}
@@ -45,6 +48,10 @@ class ParallelDownloadTaskExecutor:
 
         download_logs_dic = {}
         for task in task_list:
+
+            if task == DownloadTask.DOWN_REQUEST_SCHEDULER:
+                entry = "download_request_scheduler"
+                input_list.append((task, None))
 
             if task == DownloadTask.DOWN_ACTIVE_SELL_ORDERS:
                 entry = "download_sell_active"
@@ -133,24 +140,27 @@ class ParallelDownloadTaskExecutor:
         :return: None
         """
 
+        if task == DownloadTask.DOWN_REQUEST_SCHEDULER:
+            self._request_manager.run()
+
         if task == DownloadTask.DOWN_ACTIVE_SELL_ORDERS:
-            self._DownloadManager.download_order(get_type_string="SELL", status_string="ACTIVE", historical_prices_file_dic=historical_prices_file_dic)
+            self._DownloadManager.download_order(get_type_string="SELL", status_string="ACTIVE", mode= "un_scheduled", historical_prices_file_dic=historical_prices_file_dic)
 
         elif task == DownloadTask.DOWN_FILLED_SELL_ORDERS:
-            self._DownloadManager.download_order(get_type_string="SELL", status_string="FILLED", historical_prices_file_dic=historical_prices_file_dic)
+            self._DownloadManager.download_order(get_type_string="SELL", status_string="FILLED", mode= "un_scheduled", historical_prices_file_dic=historical_prices_file_dic)
 
         elif task == DownloadTask.DOWN_CANCELLED_SELL_ORDERS:
-            self._DownloadManager.download_order(get_type_string="SELL", status_string="CANCELLED", historical_prices_file_dic=historical_prices_file_dic)
+            self._DownloadManager.download_order(get_type_string="SELL", status_string="CANCELLED", mode= "un_scheduled", historical_prices_file_dic=historical_prices_file_dic)
 
 
         if task == DownloadTask.DOWN_ACTIVE_BUY_ORDERS:
-            self._DownloadManager.download_order(get_type_string="BUY", status_string="ACTIVE", historical_prices_file_dic=historical_prices_file_dic)
+            self._DownloadManager.download_order(get_type_string="BUY", status_string="ACTIVE", mode= "un_scheduled", historical_prices_file_dic=historical_prices_file_dic)
 
         elif task == DownloadTask.DOWN_FILLED_BUY_ORDERS:
-            self._DownloadManager.download_order(get_type_string="BUY", status_string="FILLED", historical_prices_file_dic=historical_prices_file_dic)
+            self._DownloadManager.download_order(get_type_string="BUY", status_string="FILLED", mode= "un_scheduled", historical_prices_file_dic=historical_prices_file_dic)
 
         elif task == DownloadTask.DOWN_CANCELLED_BUY_ORDERS:
-            self._DownloadManager.download_order(get_type_string="BUY", status_string="CANCELLED", historical_prices_file_dic=historical_prices_file_dic)
+            self._DownloadManager.download_order(get_type_string="BUY", status_string="CANCELLED", mode= "un_scheduled", historical_prices_file_dic=historical_prices_file_dic)
 
         elif task == DownloadTask.DOWN_WIN_RATE:
             try:

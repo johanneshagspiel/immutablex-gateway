@@ -753,6 +753,31 @@ class FileIoHelper:
         return combined_price_dic
 
     @staticmethod
+    def write_currency_overview_to_file(currency_list, currency_overview_file_path):
+        """
+        A method to write a new currency overview list to file
+        :param currency_list: the new currency overview list
+        :param currency_overview_file_path: the path to write to
+        :return: None
+        """
+        with open(currency_overview_file_path, 'w', encoding='utf-8') as currency_overview_file:
+            json.dump(currency_list, currency_overview_file, ensure_ascii=False, indent=4)
+        currency_overview_file.close()
+
+    @staticmethod
+    def read_currency_overview_to_file(currency_overview_file_path):
+        """
+        A method to read the currency overview file
+        :param currency_overview_file_path: the file to read
+        :return: the currency overview file
+        """
+        with open(currency_overview_file_path, 'r', encoding='utf-8') as currency_overview_file:
+            currency_list = json.load(currency_overview_file)
+        currency_overview_file.close()
+
+        return currency_list
+
+    @staticmethod
     def get_lines_in_file(path_to_file):
         """
         A method to determine how many lines there are in a file

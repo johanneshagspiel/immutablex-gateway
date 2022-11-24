@@ -44,9 +44,23 @@ class OrderGU:
         self.timestamp = timestamp
         self.updated_timestamp = updated_timestamp
 
+
+    def to_tuple(self):
+        """
+        Method to convert on instance of an Order to a tuple so that it can be inserted into an MYSQL database
+        :return: the instance of the Order as a tuple
+        """
+
+        return (self.order_id, self.user, self.token_id, self.token_address, self.status, self.type, self.card_name,
+                 self.card_quality, self.quantity, self.decimals, self.currency,
+                 self.price_euro_at_updated_timestamp_day,
+                 SafeDatetimeConverter.datetime_to_string(self.timestamp),
+                 SafeDatetimeConverter.datetime_to_string(self.updated_timestamp))
+
+
     def to_print_dic(self):
         """
-        Method to convert one Instance of an Order to a dictionary so that it can be written to file
+        Method to convert one instance of an Order to a dictionary so that it can be written to file
         :return: the instance of the Order as a dictionary
         """
 

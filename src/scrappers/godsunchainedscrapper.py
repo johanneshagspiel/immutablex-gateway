@@ -2,7 +2,6 @@ import os
 import requests
 import json
 from src.scrappers.immutablexscrapper import ImmutableXScrapper
-from src.util.files import filehandler
 from src.util.files.filehandler import FileHandler
 
 
@@ -10,7 +9,7 @@ class GodsUnchainedScrapper:
     """
     A class to interact with the Gods Unchained api
     """
-    _file_handler = file_handler.FileHandler()
+    _file_handler = FileHandler()
     _gods_unchained_api = "https://api.godsunchained.com/v0/"
 
     _url = "https://api.x.immutable.com/v1"
